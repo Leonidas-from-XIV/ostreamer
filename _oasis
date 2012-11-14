@@ -1,0 +1,16 @@
+OASISFormat: 0.3
+Name:        magic-streams
+Version:     0.1
+Synopsis:    Library to deal with data streams
+Authors:     Marek Kubica
+License:     PROP
+
+Library "magic-streams"
+  Path:       src/
+  BuildTools: ocamlbuild
+  
+Executable "magic-streams"
+  Path:       src
+  BuildTools: ocamlbuild
+  MainIs:     main.ml
+  
