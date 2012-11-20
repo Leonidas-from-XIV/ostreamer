@@ -1,15 +1,16 @@
 OASISFormat: 0.3
-Name:        magic-streams
+Name:        ostreamer
 Version:     0.1
 Synopsis:    Library to deal with data streams
 Authors:     Marek Kubica
 License:     PROP
+Plugins:     META (0.3), DevFiles (0.3)
 
-Library "magic-streams"
+Library "ost"
   Path:       src/
   BuildTools: ocamlbuild
   
-Executable "magic-streams"
+Executable "ost-launch"
   Path:       src
   BuildTools: ocamlbuild
   MainIs:     main.ml
