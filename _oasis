@@ -9,10 +9,13 @@ Plugins:     META (0.3), DevFiles (0.3)
 Library "ost"
   Path:       src/
   Modules:    Archive
+  CSources:   Archive_stubs.c
+  CCLib:      -larchive
   BuildTools: ocamlbuild
   
 Executable "ost-launch"
   Path:       src
   BuildTools: ocamlbuild
   CompiledObject: best
+  BuildDepends: ost
   MainIs:     launch.ml

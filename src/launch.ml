@@ -1,3 +1,3 @@
 let _ =
-    print_endline "ost-launch";
-    print_endline Archive.version;
+    print_endline (Printf.sprintf "ost-launch %d" Archive.version);
+    Archive.version_number ()
