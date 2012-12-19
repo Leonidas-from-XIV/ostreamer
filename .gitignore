@@ -7,3 +7,14 @@
 *.cmx
 *.cmxs
 *.cmxa
+setup.ml
+Makefile
+_build
+_tags
+configure
+*.byte
+*.native
+myocamlbuild.ml
+setup.data
+setup.ml
+setup.log
