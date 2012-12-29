@@ -32,6 +32,7 @@ CAMLprim value ost_read_support_filter_all(value sentinel)
 {
     struct archive* handle = (struct archive*)sentinel;
     int retval = archive_read_support_filter_all(handle);
+    printf("ost_read_support_filter_all retval: %d\n", retval);
     return Val_int(retval);
 }
 
@@ -39,7 +40,17 @@ CAMLprim value ost_read_support_format_all(value sentinel)
 {
     struct archive* handle = (struct archive*)sentinel;
     int retval = archive_read_support_format_all(handle);
+    printf("ost_read_support_format_all retval: %d\n", retval);
     return Val_int(retval);
+}
+
+void dump_buffer(char* buffer, size_t len)
+{
+    int position = 0;
+    while (position != len)
+    {
+        putchar(buffer[position++]);
+    }
 }
 
 CAMLprim value ost_read_open_memory(value archive, value buff, value size)
@@ -47,7 +58,12 @@ CAMLprim value ost_read_open_memory(value archive, value buff, value size)
     struct archive* handle = (struct archive*)archive;
     char *buffer = String_val(buff);
     size_t len = Int_val(size);
+    printf("ost_read_open_memory len: %lu\n", len);
+    printf("ost_read_open_memory buffer: ");
+    dump_buffer(buffer, len);
+    printf("\n");
     int retval = archive_read_open_memory(handle, buffer, len);
+    printf("ost_read_open_memory retval: %d\n", retval);
     return Val_int(retval);
 }
 
@@ -72,4 +88,11 @@ CAMLprim value ost_read_data(value archive, value buff, value size)
     int s = Val_int(size);
     int retval = archive_read_data(handle, buffer, s);
     return Val_int(retval);
+}
+
+CAMLprim value ost_archive_entry_pathname(value entry)
+{
+    struct archive_entry* ent = (struct archive_entry*)entry;
+    const char* name = archive_entry_pathname(ent);
+    return caml_copy_string(name);
 }

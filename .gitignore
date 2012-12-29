@@ -21,3 +21,5 @@ myocamlbuild.ml
 setup.data
 setup.ml
 setup.log
+*.gz
+minigunzip
