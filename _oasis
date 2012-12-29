@@ -17,5 +17,5 @@ Executable "ost-launch"
   Path:           src
   BuildTools:     ocamlbuild
   CompiledObject: best
-  BuildDepends:   ost
+  BuildDepends:   ost, batteries
   MainIs:         launch.ml
