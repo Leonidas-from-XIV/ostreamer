@@ -8,6 +8,6 @@ let _ =
     let handle = Archive.read_new () in
         ignore (Archive.read_support_filter_all handle);
         ignore (Archive.read_support_format_all handle);
-        ignore (Archive.read_open_memory handle content length);
+        ignore (Archive.read_open_memory handle content l);
         Archive.read_free handle;
     print_endline (Archive.version_string ())
