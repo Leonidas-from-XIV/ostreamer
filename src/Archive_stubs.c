@@ -64,3 +64,12 @@ CAMLprim value ost_read_next_header(value archive, value entry)
     int retval = archive_read_next_header(handle, &ent);
     return Val_int(retval);
 }
+
+CAMLprim value ost_read_data(value archive, value buff, value size)
+{
+    struct archive* handle = (struct archive*)archive;
+    char* buffer = (char*)buff;
+    int s = Val_int(size);
+    int retval = archive_read_data(handle, buffer, s);
+    return Val_int(retval);
+}
