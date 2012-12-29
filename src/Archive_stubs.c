@@ -1,6 +1,7 @@
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
 #include <archive.h>
+#include <archive_entry.h>
 
 CAMLprim value ost_version_number(value unit)
 {
@@ -47,5 +48,19 @@ CAMLprim value ost_read_open_memory(value archive, value buff, value size)
     char *buffer = String_val(buff);
     size_t len = Int_val(size);
     int retval = archive_read_open_memory(handle, buffer, len);
+    return Val_int(retval);
+}
+
+CAMLprim value ost_archive_entry_new(value unit)
+{
+    struct archive_entry* entry = archive_entry_new();
+    return (value)entry;
+}
+
+CAMLprim value ost_read_next_header(value archive, value entry)
+{
+    struct archive* handle = (struct archive*)archive;
+    struct archive_entry* ent = (struct archive_entry*)entry;
+    int retval = archive_read_next_header(handle, &ent);
     return Val_int(retval);
 }
