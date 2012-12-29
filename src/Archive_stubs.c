@@ -26,3 +26,26 @@ CAMLprim value ost_read_free(value sentinel)
     archive_read_free(handle);
     return Val_unit;
 }
+
+CAMLprim value ost_read_support_filter_all(value sentinel)
+{
+    struct archive* handle = (struct archive*)sentinel;
+    int retval = archive_read_support_filter_all(handle);
+    return Val_int(retval);
+}
+
+CAMLprim value ost_read_support_format_all(value sentinel)
+{
+    struct archive* handle = (struct archive*)sentinel;
+    int retval = archive_read_support_format_all(handle);
+    return Val_int(retval);
+}
+
+CAMLprim value ost_read_open_memory(value archive, value buff, value size)
+{
+    struct archive* handle = (struct archive*)archive;
+    char *buffer = String_val(buff);
+    size_t len = Int_val(size);
+    int retval = archive_read_open_memory(handle, buffer, len);
+    return Val_int(retval);
+}
