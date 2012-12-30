@@ -107,6 +107,19 @@ CAMLprim value ost_archive_entry_pathname(value entry)
     return caml_copy_string(name);
 }
 
+CAMLprim value ost_read_data_block(value archive, value buff, value size, value offset)
+{
+    struct archive* handle = (struct archive*)archive;
+    const void* b = (const void*)Field(buff, 0);
+    size_t s = (size_t)Field(size, 0);
+    int64_t o = (size_t)Field(offset, 0);
+    int retval = archive_read_data_block(handle, &b, &s, &o);
+    Field(buff, 0) = (value)b;
+    Field(size, 0) = (value)s;
+    Field(offset, 0) = (value)o;
+    return Val_int(retval);
+}
+
 CAMLprim value ost_print_pointer(value pointer)
 {
     struct archive_entry* entry = (struct archive_entry*)pointer;

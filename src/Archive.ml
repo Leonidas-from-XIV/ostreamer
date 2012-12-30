@@ -20,5 +20,6 @@ external entry_new: unit -> entry = "ost_archive_entry_new"
 external read_next_header: archive -> entry ref -> int = "ost_read_next_header"
 external read_data: archive -> string -> int -> int = "ost_read_data"
 external entry_pathname: entry -> string = "ost_archive_entry_pathname"
+external read_data_block: archive -> string ref -> int ref -> int ref -> int = "ost_read_data_block"
 
 external print_pointer: entry -> unit = "ost_print_pointer"
