@@ -8,14 +8,17 @@ let _ =
     let decompressed = "           " in
     let ldec = String.length decompressed in
     let handle = Archive.read_new () in
-    let entry = Archive.entry_new () in
+    let entry = ref (Archive.entry_new ()) in
+        Archive.print_pointer !entry;
         ignore (Archive.read_support_filter_all handle);
         ignore (Archive.read_support_format_all handle);
+        ignore (Archive.read_support_format_raw handle);
         Printf.printf "l: %d bytes\n" l;
         ignore (Archive.read_open_memory handle content l);
         ignore (Archive.read_next_header handle entry);
+        Archive.print_pointer !entry;
         (* print_endline (Archive.entry_pathname entry); *)
-        ignore (Archive.read_data handle decompressed ldec);
+        (* ignore (Archive.read_data handle decompressed ldec);*)
         print_endline decompressed;
         Archive.read_free handle;
     print_endline (Archive.version_string ())
