@@ -99,7 +99,7 @@ CAMLprim value ost_read_data(value archive, value buff, value size)
     return Val_int(retval);
 }
 
-CAMLprim value ost_archive_entry_pathname(value entry)
+CAMLprim value ost_entry_pathname(value entry)
 {
     struct archive_entry* ent = (struct archive_entry*)entry;
     const char* name = archive_entry_pathname(ent);
