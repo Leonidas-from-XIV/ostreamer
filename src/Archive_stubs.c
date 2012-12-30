@@ -86,7 +86,7 @@ CAMLprim value ost_read_next_header(value archive, value entry)
     int retval = archive_read_next_header(handle, &ent);
     printf("ent: %p\n", ent);
     printf("retval: %d\n", retval);
-    Field(entry, 0) = (int64)ent;
+    Field(entry, 0) = (value)ent;
     return Val_int(retval);
 }
 
