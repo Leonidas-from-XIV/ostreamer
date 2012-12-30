@@ -17,7 +17,7 @@ let _ =
         ignore (Archive.read_open_memory handle content l);
         ignore (Archive.read_next_header handle entry);
         Archive.print_pointer !entry;
-        (* print_endline (Archive.entry_pathname entry); *)
+        print_endline (Archive.entry_pathname !entry);
         (* ignore (Archive.read_data handle decompressed ldec);*)
         print_endline decompressed;
         Archive.read_free handle;

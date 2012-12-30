@@ -81,12 +81,12 @@ CAMLprim value ost_archive_entry_new(value unit)
 CAMLprim value ost_read_next_header(value archive, value entry)
 {
     struct archive* handle = (struct archive*)archive;
-    struct archive_entry* ent = (struct archive_entry*)entry;
+    struct archive_entry* ent = (struct archive_entry*)Field(entry, 0);
     printf("ent: %p\n", ent);
     int retval = archive_read_next_header(handle, &ent);
     printf("ent: %p\n", ent);
     printf("retval: %d\n", retval);
-    entry = (value)ent;
+    Field(entry, 0) = (int64)ent;
     return Val_int(retval);
 }
 
