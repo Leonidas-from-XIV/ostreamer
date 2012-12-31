@@ -7,11 +7,11 @@ let _ =
     let content = IO.read_all f_in in
     let l = String.length content in
     let handle = Archive.read_new () in
-    let entry = ref (Archive.entry_new ()) in
+    let entry = Archive.entry_new () in
     let buff = ref "" in
     let size = ref 0 in
     let offset = ref 0 in
-        (* Archive.print_pointer !entry; *)
+        Archive.print_pointer entry;
         ignore (Archive.read_support_filter_all handle);
         ignore (Archive.read_support_format_all handle);
         ignore (Archive.read_support_format_raw handle);
@@ -20,8 +20,8 @@ let _ =
         (* Printf.printf "errno %d\n" (Archive.errno handle); *)
         (* Printf.printf "error %s\n" (Archive.error_string handle); *)
         ignore (Archive.read_next_header handle entry);
-        (* Archive.print_pointer !entry; *)
-        print_endline (Archive.entry_pathname !entry);
-        ignore (Archive.read_data_block handle buff size offset);
+        Archive.print_pointer entry;
+        print_endline (Archive.entry_pathname entry);
+        (*ignore (Archive.read_data_block handle buff size offset);*)
         Printf.printf "size %d, offset %d, buff %s\n" !size !offset !buff;
         Archive.read_free handle

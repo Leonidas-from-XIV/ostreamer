@@ -1,6 +1,7 @@
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
 #include <caml/memory.h>
+#include <caml/custom.h>
 #include <string.h>
 #include <archive.h>
 #include <archive_entry.h>
@@ -10,6 +11,15 @@ typedef struct archive_entry* entry;
 #define Archive_val(v) ((struct archive*)(v))
 #define Entry_val(v) ((struct archive_entry*)(v))
 #define Ref_val(v) (Field((v),0))
+
+static struct custom_operations entry_ops = {
+    identifier: "entry",
+    finalize: custom_finalize_default,
+    compare: custom_compare_default,
+    hash: custom_hash_default,
+    serialize: custom_serialize_default,
+    deserialize: custom_deserialize_default
+};
 
 CAMLprim value ost_version_number(value unit)
 {
@@ -77,16 +87,26 @@ CAMLprim value ost_read_open_memory(value a, value buff, value size)
 
 CAMLprim value ost_archive_entry_new(value unit)
 {
-    entry ent = archive_entry_new();
-    return (value)ent;
+    CAMLlocal1(ml_value);
+    struct archive_entry* ent = archive_entry_new();
+    printf("Entry allocd: %p\n", ent);
+    ml_value = caml_alloc_custom(&entry_ops, sizeof(struct archive_entry*), 0, 1);
+    entry* ptr = Data_custom_val(ml_value);
+    printf("Dataval allocd: %p\n", ptr);
+    *ptr = ent;
+
+    return ml_value;
 }
 
 CAMLprim value ost_read_next_header(value a, value e)
 {
     archive handle = Archive_val(a);
-    entry ent = Entry_val(Ref_val(e));
-    int retval = archive_read_next_header(handle, &ent);
-    Ref_val(e) = (value)ent;
+    //entry ent = Entry_val(Ref_val(e));
+    entry* ent = Data_custom_val(e);
+
+    int retval = archive_read_next_header(handle, ent);
+    //Ref_val(e) = (value)ent;
+    //TODO
     return Val_int(retval);
 }
 
@@ -101,8 +121,9 @@ CAMLprim value ost_read_data(value a, value buff, value size)
 
 CAMLprim value ost_entry_pathname(value e)
 {
-    entry ent = Entry_val(e);
-    const char* name = archive_entry_pathname(ent);
+    //entry ent = Entry_val(e);
+    entry* ent = Data_custom_val(e);
+    const char* name = archive_entry_pathname(*ent);
     return caml_copy_string(name);
 }
 
@@ -125,8 +146,8 @@ CAMLprim value ost_read_data_block(value a, value buff, value size, value offset
 
 CAMLprim value ost_print_pointer(value pointer)
 {
-    entry ent = Entry_val(pointer);
-    printf("Entry: %p\n", ent);
+    entry* ent = Data_custom_val(pointer);
+    printf("Entry: %p\n", *ent);
     return Val_unit;
 }
 
