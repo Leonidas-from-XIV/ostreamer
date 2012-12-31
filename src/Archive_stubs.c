@@ -12,9 +12,12 @@ typedef struct archive_entry* entry;
 #define Entry_val(v) ((struct archive_entry**)(Data_custom_val(v)))
 #define Ref_val(v) (Field((v),0))
 
+void ost_read_free(value a);
+void ost_entry_free(value e);
+
 static struct custom_operations archive_ops = {
     identifier: "archive",
-    finalize: custom_finalize_default,
+    finalize: ost_read_free,
     compare: custom_compare_default,
     hash: custom_hash_default,
     serialize: custom_serialize_default,
@@ -23,7 +26,7 @@ static struct custom_operations archive_ops = {
 
 static struct custom_operations entry_ops = {
     identifier: "entry",
-    finalize: custom_finalize_default,
+    finalize: ost_entry_free,
     compare: custom_compare_default,
     hash: custom_hash_default,
     serialize: custom_serialize_default,
@@ -51,11 +54,10 @@ CAMLprim value ost_read_new(value unit)
     return ml_value;
 }
 
-CAMLprim value ost_read_free(value a)
+void ost_read_free(value a)
 {
     archive* handle = Archive_val(a);
     archive_read_free(*handle);
-    return Val_unit;
 }
 
 CAMLprim value ost_read_support_filter_all(value a)
@@ -106,6 +108,12 @@ CAMLprim value ost_archive_entry_new(value unit)
     *ptr = ent;
 
     return ml_value;
+}
+
+void ost_entry_free(value e)
+{
+    entry* ent = Entry_val(e);
+    archive_entry_free(*ent);
 }
 
 CAMLprim value ost_read_next_header(value a, value e)

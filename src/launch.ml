@@ -23,5 +23,4 @@ let _ =
         Archive.print_pointer entry;
         print_endline (Archive.entry_pathname entry);
         ignore (Archive.read_data_block handle buff size offset);
-        Printf.printf "size %d, offset %d, buff %s\n" !size !offset !buff;
-        Archive.read_free handle
+        Printf.printf "size %d, offset %d, buff %s\n" !size !offset !buff
