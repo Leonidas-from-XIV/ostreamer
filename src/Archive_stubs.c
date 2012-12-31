@@ -99,7 +99,7 @@ CAMLprim value ost_read_open_memory(value a, value buff, value size)
     return Val_int(retval);
 }
 
-CAMLprim value ost_archive_entry_new(value unit)
+CAMLprim value ost_entry_new(value unit)
 {
     CAMLlocal1(ml_value);
     entry ent = archive_entry_new();
