@@ -10,14 +10,14 @@ let _ =
     let buff = ref "" in
     let size = ref 0 in
     let offset = ref 0 in
-        Archive.print_pointer !entry;
+        (* Archive.print_pointer !entry; *)
         ignore (Archive.read_support_filter_all handle);
         ignore (Archive.read_support_format_all handle);
         ignore (Archive.read_support_format_raw handle);
         Printf.printf "l: %d bytes\n" l;
         ignore (Archive.read_open_memory handle content l);
         ignore (Archive.read_next_header handle entry);
-        Archive.print_pointer !entry;
+        (* Archive.print_pointer !entry; *)
         print_endline (Archive.entry_pathname !entry);
         ignore (Archive.read_data_block handle buff size offset);
         Printf.printf "size %d, offset %d, buff %s\n" !size !offset !buff;

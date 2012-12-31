@@ -65,12 +65,7 @@ CAMLprim value ost_read_open_memory(value archive, value buff, value size)
     struct archive* handle = (struct archive*)archive;
     char *buffer = String_val(buff);
     size_t len = Int_val(size);
-    printf("ost_read_open_memory len: %lu\n", len);
-    printf("ost_read_open_memory buffer: ");
-    dump_buffer(buffer, len);
-    printf("\n");
     int retval = archive_read_open_memory(handle, buffer, len);
-    printf("ost_read_open_memory retval: %d\n", retval);
     return Val_int(retval);
 }
 
@@ -84,10 +79,7 @@ CAMLprim value ost_read_next_header(value archive, value entry)
 {
     struct archive* handle = (struct archive*)archive;
     struct archive_entry* ent = (struct archive_entry*)Field(entry, 0);
-    printf("ent: %p\n", ent);
     int retval = archive_read_next_header(handle, &ent);
-    printf("ent: %p\n", ent);
-    printf("retval: %d\n", retval);
     Field(entry, 0) = (value)ent;
     return Val_int(retval);
 }
@@ -105,7 +97,6 @@ CAMLprim value ost_entry_pathname(value entry)
 {
     struct archive_entry* ent = (struct archive_entry*)entry;
     const char* name = archive_entry_pathname(ent);
-    printf("name: %s\n", archive_entry_pathname(ent));
     return caml_copy_string(name);
 }
 
