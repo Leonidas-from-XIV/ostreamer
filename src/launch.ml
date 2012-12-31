@@ -22,6 +22,6 @@ let _ =
         ignore (Archive.read_next_header handle entry);
         Archive.print_pointer entry;
         print_endline (Archive.entry_pathname entry);
-        (*ignore (Archive.read_data_block handle buff size offset);*)
+        ignore (Archive.read_data_block handle buff size offset);
         Printf.printf "size %d, offset %d, buff %s\n" !size !offset !buff;
         Archive.read_free handle
