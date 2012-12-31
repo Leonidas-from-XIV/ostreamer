@@ -9,6 +9,7 @@ typedef struct archive* archive;
 typedef struct archive_entry* entry;
 #define Archive_val(v) ((struct archive*)(v))
 #define Entry_val(v) ((struct archive_entry*)(v))
+#define Ref_val(v) (Field((v),0))
 
 CAMLprim value ost_version_number(value unit)
 {
@@ -83,9 +84,9 @@ CAMLprim value ost_archive_entry_new(value unit)
 CAMLprim value ost_read_next_header(value a, value e)
 {
     archive handle = Archive_val(a);
-    entry ent = Entry_val(Field(e, 0));
+    entry ent = Entry_val(Ref_val(e));
     int retval = archive_read_next_header(handle, &ent);
-    Field(e, 0) = (value)ent;
+    Ref_val(e) = (value)ent;
     return Val_int(retval);
 }
 
@@ -109,16 +110,16 @@ CAMLprim value ost_read_data_block(value a, value buff, value size, value offset
 {
     CAMLlocal1(ml_buff);
     archive handle = Archive_val(a);
-    const void* b = (const void*)Field(buff, 0);
-    size_t s = (size_t)Field(size, 0);
-    int64_t o = (size_t)Field(offset, 0);
+    const void* b = (const void*)Ref_val(buff);
+    size_t s = (size_t)Ref_val(size);
+    int64_t o = (size_t)Ref_val(offset);
 
     int retval = archive_read_data_block(handle, &b, &s, &o);
     ml_buff = caml_alloc_string(s);
     memcpy(String_val(ml_buff), b, s);
-    Field(buff, 0) = ml_buff;
-    Field(size, 0) = (value)s;
-    Field(offset, 0) = (value)o;
+    Ref_val(buff) = ml_buff;
+    Ref_val(size) = (value)s;
+    Ref_val(offset) = (value)o;
     return Val_int(retval);
 }
 
