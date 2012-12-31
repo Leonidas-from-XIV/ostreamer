@@ -5,6 +5,9 @@
 #include <archive.h>
 #include <archive_entry.h>
 
+#define Archive_val(v) ((struct archive*)(v))
+#define Entry_val(v) ((struct archive_entry*)(v))
+
 CAMLprim value ost_version_number(value unit)
 {
     int version_number = archive_version_number();
@@ -23,30 +26,30 @@ CAMLprim value ost_read_new(value unit)
     return (value)handle;
 }
 
-CAMLprim value ost_read_free(value sentinel)
+CAMLprim value ost_read_free(value archive)
 {
-    struct archive* handle = (struct archive*)sentinel;
+    struct archive* handle = Archive_val(archive);
     archive_read_free(handle);
     return Val_unit;
 }
 
-CAMLprim value ost_read_support_filter_all(value sentinel)
+CAMLprim value ost_read_support_filter_all(value archive)
 {
-    struct archive* handle = (struct archive*)sentinel;
+    struct archive* handle = Archive_val(archive);
     int retval = archive_read_support_filter_all(handle);
     return Val_int(retval);
 }
 
-CAMLprim value ost_read_support_format_all(value sentinel)
+CAMLprim value ost_read_support_format_all(value archive)
 {
-    struct archive* handle = (struct archive*)sentinel;
+    struct archive* handle = Archive_val(archive);
     int retval = archive_read_support_format_all(handle);
     return Val_int(retval);
 }
 
-CAMLprim value ost_read_support_format_raw(value sentinel)
+CAMLprim value ost_read_support_format_raw(value archive)
 {
-    struct archive* handle = (struct archive*)sentinel;
+    struct archive* handle = Archive_val(archive);
     int retval = archive_read_support_format_raw(handle);
     return Val_int(retval);
 }
@@ -62,7 +65,7 @@ void dump_buffer(char* buffer, size_t len)
 
 CAMLprim value ost_read_open_memory(value archive, value buff, value size)
 {
-    struct archive* handle = (struct archive*)archive;
+    struct archive* handle = Archive_val(archive);
     char *buffer = String_val(buff);
     size_t len = Int_val(size);
     int retval = archive_read_open_memory(handle, buffer, len);
@@ -77,8 +80,8 @@ CAMLprim value ost_archive_entry_new(value unit)
 
 CAMLprim value ost_read_next_header(value archive, value entry)
 {
-    struct archive* handle = (struct archive*)archive;
-    struct archive_entry* ent = (struct archive_entry*)Field(entry, 0);
+    struct archive* handle = Archive_val(archive);
+    struct archive_entry* ent = Entry_val(Field(entry, 0));
     int retval = archive_read_next_header(handle, &ent);
     Field(entry, 0) = (value)ent;
     return Val_int(retval);
@@ -86,7 +89,7 @@ CAMLprim value ost_read_next_header(value archive, value entry)
 
 CAMLprim value ost_read_data(value archive, value buff, value size)
 {
-    struct archive* handle = (struct archive*)archive;
+    struct archive* handle = Archive_val(archive);
     char* buffer = (char*)buff;
     int s = Val_int(size);
     int retval = archive_read_data(handle, buffer, s);
@@ -95,7 +98,7 @@ CAMLprim value ost_read_data(value archive, value buff, value size)
 
 CAMLprim value ost_entry_pathname(value entry)
 {
-    struct archive_entry* ent = (struct archive_entry*)entry;
+    struct archive_entry* ent = Entry_val(entry);
     const char* name = archive_entry_pathname(ent);
     return caml_copy_string(name);
 }
@@ -103,7 +106,7 @@ CAMLprim value ost_entry_pathname(value entry)
 CAMLprim value ost_read_data_block(value archive, value buff, value size, value offset)
 {
     CAMLlocal1(ml_buff);
-    struct archive* handle = (struct archive*)archive;
+    struct archive* handle = Archive_val(archive);
     const void* b = (const void*)Field(buff, 0);
     size_t s = (size_t)Field(size, 0);
     int64_t o = (size_t)Field(offset, 0);
@@ -119,19 +122,19 @@ CAMLprim value ost_read_data_block(value archive, value buff, value size, value 
 
 CAMLprim value ost_print_pointer(value pointer)
 {
-    struct archive_entry* entry = (struct archive_entry*)pointer;
+    struct archive_entry* entry = Entry_val(pointer);
     printf("Entry: %p\n", entry);
     return Val_unit;
 }
 
 CAMLprim value ost_errno(value archive)
 {
-    struct archive* handle = (struct archive*)archive;
+    struct archive* handle = Archive_val(archive);
     return Val_int(archive_errno(handle));
 }
 
 CAMLprim value ost_error_string(value archive)
 {
-    struct archive* handle = (struct archive*)archive;
+    struct archive* handle = Archive_val(archive);
     return caml_copy_string(archive_error_string(handle));
 }
