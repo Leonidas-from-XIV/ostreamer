@@ -1,5 +1,7 @@
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
+#include <caml/memory.h>
+#include <string.h>
 #include <archive.h>
 #include <archive_entry.h>
 
@@ -109,12 +111,16 @@ CAMLprim value ost_entry_pathname(value entry)
 
 CAMLprim value ost_read_data_block(value archive, value buff, value size, value offset)
 {
+    CAMLlocal1(ml_buff);
     struct archive* handle = (struct archive*)archive;
     const void* b = (const void*)Field(buff, 0);
     size_t s = (size_t)Field(size, 0);
     int64_t o = (size_t)Field(offset, 0);
+
     int retval = archive_read_data_block(handle, &b, &s, &o);
-    Field(buff, 0) = (value)b;
+    ml_buff = caml_alloc_string(s);
+    memcpy(String_val(ml_buff), b, s);
+    Field(buff, 0) = ml_buff;
     Field(size, 0) = (value)s;
     Field(offset, 0) = (value)o;
     return Val_int(retval);
