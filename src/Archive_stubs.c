@@ -101,10 +101,8 @@ CAMLprim value ost_archive_entry_new(value unit)
 {
     CAMLlocal1(ml_value);
     entry ent = archive_entry_new();
-    printf("Entry allocd: %p\n", ent);
     ml_value = caml_alloc_custom(&entry_ops, sizeof(entry), 0, 1);
     entry* ptr = Entry_val(ml_value);
-    printf("Dataval allocd: %p\n", ptr);
     *ptr = ent;
 
     return ml_value;
