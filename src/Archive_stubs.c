@@ -124,8 +124,8 @@ CAMLprim value ost_read_data_block(value a, value buff, value size, value offset
 
 CAMLprim value ost_print_pointer(value pointer)
 {
-    struct archive_entry* entry = Entry_val(pointer);
-    printf("Entry: %p\n", entry);
+    entry ent = Entry_val(pointer);
+    printf("Entry: %p\n", ent);
     return Val_unit;
 }
 
