@@ -21,5 +21,7 @@ external read_next_header: archive -> entry ref -> int = "ost_read_next_header"
 external read_data: archive -> string -> int -> int = "ost_read_data"
 external entry_pathname: entry -> string = "ost_entry_pathname"
 external read_data_block: archive -> string ref -> int ref -> int ref -> int = "ost_read_data_block"
+external errno: archive -> int = "ost_errno"
+external error_string: archive -> string = "ost_error_string"
 
 external print_pointer: entry -> unit = "ost_print_pointer"

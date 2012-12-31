@@ -123,3 +123,15 @@ CAMLprim value ost_print_pointer(value pointer)
     printf("Entry: %p\n", entry);
     return Val_unit;
 }
+
+CAMLprim value ost_errno(value archive)
+{
+    struct archive* handle = (struct archive*)archive;
+    return Val_int(archive_errno(handle));
+}
+
+CAMLprim value ost_error_string(value archive)
+{
+    struct archive* handle = (struct archive*)archive;
+    return caml_copy_string(archive_error_string(handle));
+}
