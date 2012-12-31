@@ -5,7 +5,7 @@
 #include <archive.h>
 #include <archive_entry.h>
 
-typedef struct archive* arc;
+typedef struct archive* archive;
 typedef struct archive_entry* entry;
 #define Archive_val(v) ((struct archive*)(v))
 #define Entry_val(v) ((struct archive_entry*)(v))
@@ -24,34 +24,34 @@ CAMLprim value ost_version_string(value unit)
 
 CAMLprim value ost_read_new(value unit)
 {
-    arc handle = archive_read_new();
+    archive handle = archive_read_new();
     return (value)handle;
 }
 
-CAMLprim value ost_read_free(value archive)
+CAMLprim value ost_read_free(value a)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     archive_read_free(handle);
     return Val_unit;
 }
 
-CAMLprim value ost_read_support_filter_all(value archive)
+CAMLprim value ost_read_support_filter_all(value a)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     int retval = archive_read_support_filter_all(handle);
     return Val_int(retval);
 }
 
-CAMLprim value ost_read_support_format_all(value archive)
+CAMLprim value ost_read_support_format_all(value a)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     int retval = archive_read_support_format_all(handle);
     return Val_int(retval);
 }
 
-CAMLprim value ost_read_support_format_raw(value archive)
+CAMLprim value ost_read_support_format_raw(value a)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     int retval = archive_read_support_format_raw(handle);
     return Val_int(retval);
 }
@@ -65,9 +65,9 @@ void dump_buffer(char* buffer, size_t len)
     }
 }
 
-CAMLprim value ost_read_open_memory(value archive, value buff, value size)
+CAMLprim value ost_read_open_memory(value a, value buff, value size)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     char *buffer = String_val(buff);
     size_t len = Int_val(size);
     int retval = archive_read_open_memory(handle, buffer, len);
@@ -80,18 +80,18 @@ CAMLprim value ost_archive_entry_new(value unit)
     return (value)ent;
 }
 
-CAMLprim value ost_read_next_header(value archive, value e)
+CAMLprim value ost_read_next_header(value a, value e)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     entry ent = Entry_val(Field(e, 0));
     int retval = archive_read_next_header(handle, &ent);
     Field(e, 0) = (value)ent;
     return Val_int(retval);
 }
 
-CAMLprim value ost_read_data(value archive, value buff, value size)
+CAMLprim value ost_read_data(value a, value buff, value size)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     char* buffer = (char*)buff;
     int s = Val_int(size);
     int retval = archive_read_data(handle, buffer, s);
@@ -105,10 +105,10 @@ CAMLprim value ost_entry_pathname(value e)
     return caml_copy_string(name);
 }
 
-CAMLprim value ost_read_data_block(value archive, value buff, value size, value offset)
+CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
 {
     CAMLlocal1(ml_buff);
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     const void* b = (const void*)Field(buff, 0);
     size_t s = (size_t)Field(size, 0);
     int64_t o = (size_t)Field(offset, 0);
@@ -129,14 +129,14 @@ CAMLprim value ost_print_pointer(value pointer)
     return Val_unit;
 }
 
-CAMLprim value ost_errno(value archive)
+CAMLprim value ost_errno(value a)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     return Val_int(archive_errno(handle));
 }
 
-CAMLprim value ost_error_string(value archive)
+CAMLprim value ost_error_string(value a)
 {
-    arc handle = Archive_val(archive);
+    archive handle = Archive_val(a);
     return caml_copy_string(archive_error_string(handle));
 }
