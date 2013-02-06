@@ -81,6 +81,20 @@ CAMLprim value ost_read_support_format_raw(value a)
     return Val_int(retval);
 }
 
+CAMLprim value ost_write_set_format_raw(value a)
+{
+    archive* handle = Archive_val(a);
+    int retval = archive_write_set_format_raw(*handle);
+    return Val_int(retval);
+}
+
+CAMLprim value ost_write_add_filter_gzip(value a)
+{
+    archive* handle = Archive_val(a);
+    int retval = archive_write_add_filter_gzip(*handle);
+    return Val_int(retval);
+}
+
 void dump_buffer(char* buffer, size_t len)
 {
     int position = 0;

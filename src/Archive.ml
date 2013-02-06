@@ -22,5 +22,7 @@ external entry_pathname: entry -> string = "ost_entry_pathname"
 external read_data_block: archive -> string ref -> int ref -> int ref -> int = "ost_read_data_block"
 external errno: archive -> int = "ost_errno"
 external error_string: archive -> string = "ost_error_string"
+external write_set_format_raw: archive -> int = "ost_write_set_format_raw"
+external write_add_filter_gzip: archive -> int = "ost_write_add_filter_gzip"
 
 external print_pointer: entry -> unit = "ost_print_pointer"
