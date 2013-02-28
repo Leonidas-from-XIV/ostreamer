@@ -48,3 +48,16 @@ let read_entire_data archive =
         done;
         Buffer.add_string buffer !c_buffer;
         Buffer.contents buffer
+
+(* internal *)
+let rec chunks str size = match String.length str with
+        | n when n <= size -> [str]
+        | n -> (String.sub str 0 size)::(chunks (String.sub str size (n-size)) size)
+
+(*
+let write_entire_data archive content =
+        let c_buffer_size = 1024 in
+        let c_buffer = ref (String.create c_buffer_size) in
+        let chk = chunks content c_buffer_size in
+        "TODO"
+*)
