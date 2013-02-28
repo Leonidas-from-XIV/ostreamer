@@ -37,14 +37,14 @@ external write_close: archive -> int = "ost_write_close"
 
 external print_pointer: entry -> unit = "ost_print_pointer"
 
-let read_whole_data archive =
-        let buffer_size = 1024 in
-        let buffer = ref (String.create buffer_size) in
-        let all = ref "" in
-        let read = ref (read_data archive buffer buffer_size) in
-        while !read = buffer_size do
-                all := !all ^ !buffer;
-                read := read_data archive buffer buffer_size
+let read_entire_data archive =
+        let c_buffer_size = 1024 in
+        let c_buffer = ref (String.create c_buffer_size) in
+        let buffer = Buffer.create 16 in
+        let read = ref (read_data archive c_buffer c_buffer_size) in
+        while !read = c_buffer_size do
+                Buffer.add_string buffer !c_buffer;
+                read := read_data archive c_buffer c_buffer_size
         done;
-        all := !all ^ !buffer;
-        !all
+        Buffer.add_string buffer !c_buffer;
+        Buffer.contents buffer
