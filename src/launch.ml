@@ -26,8 +26,12 @@ let _ =
         ignore (Archive.read_next_header readhandle readentry);
         Archive.print_pointer readentry;
         print_endline (Archive.entry_pathname readentry);
-        let read = Archive.read_data readhandle buff uncompsize in
-        Printf.printf "read %d, buff %s\n" read !buff;
+        (* let read = Archive.read_data readhandle buff uncompsize in *)
+        let uncompressed = Archive.read_whole_data readhandle in
+        let read = String.length uncompressed in
+        Printf.printf "read %d, uncompressed %s" read uncompressed;
+        buff := uncompressed;
+        (* Printf.printf "read %d, buff %s\n" read !buff; *)
         (* write stuff *)
         ignore (Archive.write_set_format_raw writehandle);
         ignore (Archive.write_add_filter_gzip writehandle);
