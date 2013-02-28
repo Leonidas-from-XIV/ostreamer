@@ -81,6 +81,54 @@ CAMLprim value ost_read_support_format_raw(value a)
     return Val_int(retval);
 }
 
+CAMLprim value ost_write_new(value unit)
+{
+    CAMLlocal1(ml_value);
+    ml_value = caml_alloc_custom(&archive_ops, sizeof(archive), 0, 1);
+    archive* ptr = Data_custom_val(ml_value);
+    *ptr = archive_write_new();
+    return ml_value;
+}
+
+CAMLprim value ost_write_open_memory(value a, value b, value bs, value ou)
+{
+    archive* handle = Archive_val(a);
+    char* buffer = (char*)Ref_val(b);
+    size_t bufferSize = Int_val(bs);
+    /* NOTE: this is a raw value */
+    size_t* outUsed = (size_t*)(ou);
+
+    int retval = archive_write_open_memory(*handle, buffer, bufferSize, outUsed);
+
+    return Val_int(retval);
+}
+
+CAMLprim value ost_write_header(value a, value e)
+{
+    archive* handle = Archive_val(a);
+    entry* entry = Entry_val(e);
+
+    int retval = archive_write_header(*handle, *entry);
+    return Val_int(retval);
+}
+
+CAMLprim value ost_write_data(value a, value b, value s)
+{
+    archive* handle = Archive_val(a);
+    char* buffer = (char*)b;
+    size_t size = Val_int(s);
+
+    int retval = archive_write_data(*handle, buffer, size);
+    return Val_int(retval);
+}
+
+CAMLprim value ost_write_close(value a)
+{
+    archive* handle = Archive_val(a);
+    int retval = archive_write_close(*handle);
+    return Val_int(retval);
+}
+
 CAMLprim value ost_write_set_format_raw(value a)
 {
     archive* handle = Archive_val(a);

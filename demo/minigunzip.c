@@ -37,6 +37,26 @@ int main(void)
     printf("read_data_block retval: %d\n", retval);
 
     printf("buff: %s\n", b);
+    archive_read_close(a);
+    // read part finished, now write
+
+    a = archive_write_new();
+    archive_write_add_filter_gzip(a);
+    archive_write_set_format_raw(a);
+
+    size_t compressed_size = 100;
+    char* compressed[compressed_size];
+    size_t out_used;
+    archive_write_open_memory(a, compressed, compressed_size, &out_used);
+    e = archive_entry_new();
+    retval = archive_write_header(a, e);
+    printf("write_header retval: %d\n", retval);
+    archive_write_data(a, b, size);
+    printf("write_data retval: %d\n", retval);
+    archive_write_close(a);
+    printf("out_used: %d\n", out_used);
+    fwrite(compressed, 1, out_used, stderr);
+    archive_write_free(a);
 
     return 0;
 }
