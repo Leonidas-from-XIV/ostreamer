@@ -115,10 +115,14 @@ CAMLprim value ost_write_header(value a, value e)
 CAMLprim value ost_write_data(value a, value b, value s)
 {
     archive* handle = Archive_val(a);
-    char* buffer = (char*)b;
-    size_t size = Val_int(s);
+    char* buffer = String_val(b);
+    size_t size = Int_val(s);
+    printf("Writing size: %zu\n", size);
+    //fwrite(buffer, 1, size, stderr);
 
     int retval = archive_write_data(*handle, buffer, size);
+    printf("Retval write_data = %d\n", retval);
+    printf("Error: %s\n", archive_error_string(*handle));
     return Val_int(retval);
 }
 
@@ -178,6 +182,34 @@ void ost_entry_free(value e)
     archive_entry_free(*ent);
 }
 
+/* TODO: check if this is accessible directly from a header file */
+typedef enum _ost_file_kind {
+    S_REG = 1,
+    S_DIR,
+    S_CHR,
+    S_BLK,
+    S_LNK,
+    S_FIFO,
+    S_SOCK
+} ost_file_kind;
+
+CAMLprim value ost_entry_set_filetype(value e, value t)
+{
+    entry* entry = Entry_val(e);
+    unsigned int type = 0;
+
+    switch (Int_val(t))
+    {
+        case S_REG:
+            type = AE_IFREG;
+            break;
+    }
+
+    archive_entry_set_filetype(*entry, type);
+
+    return Val_unit;
+}
+
 CAMLprim value ost_read_next_header(value a, value e)
 {
     archive* handle = Archive_val(a);
@@ -215,7 +247,7 @@ CAMLprim value ost_read_data_block(value a, value buff, value size, value offset
     ml_buff = caml_alloc_string(s);
     memcpy(String_val(ml_buff), b, s);
     Ref_val(buff) = ml_buff;
-    Ref_val(size) = (value)s;
+    Ref_val(size) = Val_int(s);
     Ref_val(offset) = (value)o;
     return Val_int(retval);
 }

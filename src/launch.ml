@@ -35,9 +35,10 @@ let _ =
         ignore (Archive.write_open_memory writehandle compressed compsize outused);
         Printf.printf "outused %d\n" !outused;
         Archive.print_pointer writeentry;
+        Archive.entry_set_filetype writeentry Unix.S_DIR;
         ignore (Archive.write_header writehandle writeentry);
         Archive.print_pointer writeentry;
-        ignore (Archive.write_data writehandle buff !size);
+        ignore (Archive.write_data writehandle !buff !size);
         ignore (Archive.write_close writehandle);
         Printf.printf "compressed:\n";
         Printf.eprintf "%s" !compressed

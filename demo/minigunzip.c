@@ -49,8 +49,12 @@ int main(void)
     size_t out_used;
     archive_write_open_memory(a, compressed, compressed_size, &out_used);
     e = archive_entry_new();
+    archive_entry_set_filetype(e, AE_IFREG);
     retval = archive_write_header(a, e);
     printf("write_header retval: %d\n", retval);
+    if (retval != ARCHIVE_OK) {
+        printf("Error: %s\n", archive_error_string(a));
+    }
     archive_write_data(a, b, size);
     printf("write_data retval: %d\n", retval);
     archive_write_close(a);
