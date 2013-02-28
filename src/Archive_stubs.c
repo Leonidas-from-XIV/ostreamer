@@ -95,12 +95,31 @@ CAMLprim value ost_write_open_memory(value a, value b, value bs, value ou)
     archive* handle = Archive_val(a);
     char* buffer = (char*)Ref_val(b);
     size_t bufferSize = Int_val(bs);
-    /* NOTE: this is a raw value */
-    size_t* outUsed = (size_t*)(ou);
+    size_t* outUsed = (size_t*)ou;
 
     int retval = archive_write_open_memory(*handle, buffer, bufferSize, outUsed);
 
     return Val_int(retval);
+}
+
+CAMLprim value ost_out_used_new(value u)
+{
+    size_t* outUsed = malloc(sizeof (size_t));
+    *outUsed = 0;
+    return (value)outUsed;
+}
+
+CAMLprim value ost_out_used_read(value ou)
+{
+    size_t* outUsed = (size_t*)ou;
+    return Val_int(*outUsed);
+}
+
+CAMLprim value ost_out_used_free(value ou)
+{
+    size_t* outUsed = (size_t*)ou;
+    free(outUsed);
+    return Val_unit;
 }
 
 CAMLprim value ost_write_header(value a, value e)

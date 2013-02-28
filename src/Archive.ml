@@ -1,5 +1,7 @@
 type archive
 type entry
+type out_used
+
 type status =
     | Ok
     | Eof
@@ -28,7 +30,7 @@ external entry_set_filetype: entry -> Unix.file_kind -> unit = "ost_entry_set_fi
 external entry_pathname: entry -> string = "ost_entry_pathname"
 
 external write_new: unit -> archive = "ost_write_new"
-external write_open_memory: archive -> string ref -> int -> int ref -> int = "ost_write_open_memory"
+external write_open_memory: archive -> string ref -> int -> out_used -> int = "ost_write_open_memory"
 external write_header: archive -> entry -> int ="ost_write_header"
 external write_set_format_raw: archive -> int = "ost_write_set_format_raw"
 external write_add_filter_gzip: archive -> int = "ost_write_add_filter_gzip"
@@ -36,6 +38,10 @@ external write_data: archive -> string -> int -> int = "ost_write_data"
 external write_close: archive -> int = "ost_write_close"
 
 external print_pointer: entry -> unit = "ost_print_pointer"
+external out_used_new: unit -> out_used = "ost_out_used_new"
+external out_used_read: out_used -> int = "ost_out_used_read"
+external out_used_free: out_used -> unit = "ost_out_used_free"
+
 
 let read_entire_data archive =
         let c_buffer_size = 1024 in
@@ -46,7 +52,8 @@ let read_entire_data archive =
                 Buffer.add_string buffer !c_buffer;
                 read := read_data archive c_buffer c_buffer_size
         done;
-        Buffer.add_string buffer !c_buffer;
+        (* Only add as many bytes to the buffer as were read *)
+        Buffer.add_string buffer (String.sub !c_buffer 0 !read);
         Buffer.contents buffer
 
 (* internal *)
