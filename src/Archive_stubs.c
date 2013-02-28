@@ -222,8 +222,9 @@ CAMLprim value ost_read_next_header(value a, value e)
 CAMLprim value ost_read_data(value a, value buff, value size)
 {
     archive* handle = Archive_val(a);
-    char* buffer = (char*)buff;
-    int s = Val_int(size);
+    char* buffer = (char*)Ref_val(buff);
+    int s = Int_val(size);
+
     int retval = archive_read_data(*handle, buffer, s);
     return Val_int(retval);
 }

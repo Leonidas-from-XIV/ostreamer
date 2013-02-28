@@ -8,9 +8,8 @@ let _ =
     let l = String.length content in
     let readhandle = Archive.read_new () in
     let readentry = Archive.entry_new () in
-    let buff = ref "" in
-    let size = ref 0 in
-    let offset = ref 0 in
+    let uncompsize = 100 in
+    let buff = ref (String.create uncompsize) in
     let writehandle = Archive.write_new () in
     let compsize = 100 in
     let compressed = ref (String.create compsize) in
@@ -27,8 +26,8 @@ let _ =
         ignore (Archive.read_next_header readhandle readentry);
         Archive.print_pointer readentry;
         print_endline (Archive.entry_pathname readentry);
-        ignore (Archive.read_data_block readhandle buff size offset);
-        Printf.printf "size %d, offset %d, buff %s\n" !size !offset !buff;
+        let read = Archive.read_data readhandle buff uncompsize in
+        Printf.printf "read %d, buff %s\n" read !buff;
         (* write stuff *)
         ignore (Archive.write_set_format_raw writehandle);
         ignore (Archive.write_add_filter_gzip writehandle);
@@ -38,7 +37,7 @@ let _ =
         Archive.entry_set_filetype writeentry Unix.S_DIR;
         ignore (Archive.write_header writehandle writeentry);
         Archive.print_pointer writeentry;
-        ignore (Archive.write_data writehandle !buff !size);
+        ignore (Archive.write_data writehandle !buff read);
         ignore (Archive.write_close writehandle);
         Printf.printf "compressed:\n";
         Printf.eprintf "%s" !compressed
