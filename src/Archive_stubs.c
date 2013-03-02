@@ -6,6 +6,8 @@
 #include <archive.h>
 #include <archive_entry.h>
 
+#include "ost_write_open_memory.h"
+
 typedef struct archive* archive;
 typedef struct archive_entry* entry;
 #define Archive_val(v) ((struct archive**)(Data_custom_val(v)))
@@ -93,7 +95,7 @@ CAMLprim value ost_write_new(value unit)
 CAMLprim value ost_write_open_memory(value a, value b, value w)
 {
     archive* handle = Archive_val(a);
-    char* bufptr = (char*)b;
+    char** bufptr = (char**)b;
     size_t* wptr = (size_t*)w;
 
     int retval = ost_write_open_dynamic_memory(*handle, bufptr, wptr);
