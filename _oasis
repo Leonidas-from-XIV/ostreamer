@@ -9,7 +9,7 @@ Plugins:     META (0.3), DevFiles (0.3)
 Library "ost"
   Path:       src/
   Modules:    Archive
-  CSources:   Archive_stubs.c
+  CSources:   Archive_stubs.c, ost_write_open_memory.c
   CCLib:      -larchive
   BuildTools: ocamlbuild
 
