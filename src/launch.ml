@@ -9,9 +9,8 @@ let _ =
     let readhandle = Archive.read_new () in
     let readentry = Archive.entry_new () in
     let writehandle = Archive.write_new () in
-    let compsize = 100 in
-    let compressed = ref (String.create compsize) in
-    let outused = Archive.out_used_new () in
+    let compressed = Archive.write_buffer_new () in
+    let written = Archive.written_ptr_new () in
     let writeentry = Archive.entry_new () in
         Archive.print_pointer readentry;
         ignore (Archive.read_support_filter_all readhandle);
@@ -30,15 +29,15 @@ let _ =
         (* write stuff *)
         ignore (Archive.write_set_format_raw writehandle);
         ignore (Archive.write_add_filter_gzip writehandle);
-        Printf.printf "outused %d\n" (Archive.out_used_read outused);
-        ignore (Archive.write_open_memory writehandle compressed compsize outused);
+        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
+        ignore (Archive.write_open_memory writehandle compressed written);
         Archive.print_pointer writeentry;
         Archive.entry_set_filetype writeentry Unix.S_DIR;
         ignore (Archive.write_header writehandle writeentry);
         Archive.print_pointer writeentry;
         ignore (Archive.write_data writehandle uncompressed read);
-        Printf.printf "outused %d\n" (Archive.out_used_read outused);
+        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
         ignore (Archive.write_close writehandle);
-        Printf.printf "outused %d\n" (Archive.out_used_read outused);
+        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
         Printf.printf "compressed:\n";
-        Printf.eprintf "%s" (String.sub !compressed 0 (Archive.out_used_read outused))
+        Printf.eprintf "%s" (Archive.write_buffer_read compressed written)

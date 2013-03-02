@@ -90,35 +90,62 @@ CAMLprim value ost_write_new(value unit)
     return ml_value;
 }
 
-CAMLprim value ost_write_open_memory(value a, value b, value bs, value ou)
+CAMLprim value ost_write_open_memory(value a, value b, value w)
 {
     archive* handle = Archive_val(a);
-    char* buffer = (char*)Ref_val(b);
-    size_t bufferSize = Int_val(bs);
-    size_t* outUsed = (size_t*)ou;
+    char* bufptr = (char*)b;
+    size_t* wptr = (size_t*)w;
 
-    int retval = archive_write_open_memory(*handle, buffer, bufferSize, outUsed);
+    int retval = ost_write_open_dynamic_memory(*handle, bufptr, wptr);
 
     return Val_int(retval);
 }
 
-CAMLprim value ost_out_used_new(value u)
+CAMLprim value ost_written_ptr_new(value u)
 {
-    size_t* outUsed = malloc(sizeof (size_t));
-    *outUsed = 0;
-    return (value)outUsed;
+    size_t* written = malloc(sizeof (size_t*));
+    /* TODO: error handling */
+    *written = 0;
+    return (value)written;
 }
 
-CAMLprim value ost_out_used_read(value ou)
+CAMLprim value ost_written_ptr_read(value w)
 {
-    size_t* outUsed = (size_t*)ou;
-    return Val_int(*outUsed);
+    size_t* written = (size_t*)w;
+    return Val_int(*written);
 }
 
-CAMLprim value ost_out_used_free(value ou)
+CAMLprim value ost_written_ptr_free(value w)
 {
-    size_t* outUsed = (size_t*)ou;
-    free(outUsed);
+    size_t* written = (size_t*)w;
+    free(written);
+    return Val_unit;
+}
+
+CAMLprim value ost_write_buffer_new(value u)
+{
+    char** buffer = malloc(sizeof (char**));
+    /* Initialize to "uninitialized" */
+    *buffer = NULL;
+    return (value)buffer;
+}
+
+CAMLprim value ost_write_buffer_read(value b, value w)
+{
+    CAMLlocal1(ml_data);
+    char** buffer = (char**)b;
+    size_t* written = (size_t*)w;
+
+    ml_data = caml_alloc_string(*written);
+    memcpy(String_val(ml_data), *buffer, *written);
+    return ml_data;
+}
+
+CAMLprim value ost_write_buffer_free(value b)
+{
+    char** buffer = (char**)b;
+    free(*buffer);
+    free(buffer);
     return Val_unit;
 }
 

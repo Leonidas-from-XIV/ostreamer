@@ -20,7 +20,7 @@ struct ost_write_memory_data {
     char** current_buffer;
 };
 
-int ost_c_write_open_memory(struct archive* a, char** location, size_t* written)
+int ost_write_open_dynamic_memory(struct archive* a, char** location, size_t* written)
 {
     struct ost_write_memory_data* mine;
     mine = (struct ost_write_memory_data*)calloc(1, sizeof (*mine));
@@ -31,6 +31,13 @@ int ost_c_write_open_memory(struct archive* a, char** location, size_t* written)
     mine->current_buffer = location;
     mine->written = written;
     mine->current_size = 0;
+
+    /* "magic" code taken from archive_write_open_memory.c */
+    /* disable padding */
+    if (-1 == archive_write_get_bytes_in_last_block(a)) {
+        archive_write_set_bytes_in_last_block(a, 1);
+    }
+
     return (archive_write_open(a, mine, ost_mem_open, ost_mem_write, ost_mem_close));
 }
 
@@ -80,12 +87,14 @@ static ssize_t ost_mem_write(struct archive* a, void* client_data, const void* b
             return (-1);
         }
 
-        /* management stuff */
+        /* management stuff: adjust the size and set the new buffer address */
         mine->current_size = candidate_size;
         *mine->current_buffer = new_buffer;
     }
 
+    /* add the new data to the end of the old data */
     memcpy(*mine->current_buffer + *mine->written, buff, length);
     *mine->written += length;
+
     return (length);
 }
