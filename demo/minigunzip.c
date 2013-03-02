@@ -57,8 +57,9 @@ int main(void)
     }
     archive_write_data(a, b, size);
     printf("write_data retval: %d\n", retval);
+    printf("out_used before close: %d\n", out_used);
     archive_write_close(a);
-    printf("out_used: %d\n", out_used);
+    printf("out_used after close: %d\n", out_used);
     fwrite(compressed, 1, out_used, stderr);
     archive_write_free(a);
 
