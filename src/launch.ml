@@ -1,9 +1,28 @@
 open Batteries_uni
 
+(* helper for reduce *)
+let bang_fold acc = function
+    | "!" -> []::acc
+    | e -> (List.append (List.hd acc) [e])::(List.tl acc)
+
+(* splits a list of [a b ! c] into [[a b] [c] *)
+let bang_split pipe = List.rev (List.fold_left bang_fold [[]] pipe)
+
+(* debugging only *)
+let print_pipe pipe = List.print (fun out element -> IO.nwrite out element) stdout pipe
+
+let parse_commandline argv =
+    let largv = Array.to_list argv in
+    let args = List.tl largv in
+    bang_split args
+
 let _ =
     print_endline (Printf.sprintf "ost-launch %d" (Archive.version_number ()));
     print_endline (Archive.version_string ());
-    let f_in = File.open_in "test.gz" in
+    let commands = parse_commandline Sys.argv in
+    let input_file = List.nth (List.nth commands 0) 0 in
+    let output_file = List.nth (List.nth commands 1) 0 in
+    let f_in = File.open_in input_file in
     let content = IO.read_all f_in in
     let l = String.length content in
     let readhandle = Archive.read_new () in
@@ -39,5 +58,5 @@ let _ =
         Printf.printf "outused %d\n" (Archive.written_ptr_read written);
         ignore (Archive.write_close writehandle);
         Printf.printf "outused %d\n" (Archive.written_ptr_read written);
-        Printf.printf "compressed:\n";
-        Printf.eprintf "%s" (Archive.write_buffer_read compressed written)
+        File.with_file_out output_file (fun f_out ->
+            IO.nwrite f_out (Archive.write_buffer_read compressed written))
