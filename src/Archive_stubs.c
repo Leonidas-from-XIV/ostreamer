@@ -334,6 +334,18 @@ CAMLprim value ost_entry_atime(value e)
             archive_entry_atime);
 }
 
+CAMLprim value ost_entry_ctime(value e)
+{
+    return ost_entry_read_time(e, archive_entry_ctime_is_set,
+            archive_entry_ctime);
+}
+
+CAMLprim value ost_entry_birthtime(value e)
+{
+    return ost_entry_read_time(e, archive_entry_birthtime_is_set,
+            archive_entry_birthtime);
+}
+
 CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
 {
     CAMLlocal1(ml_buff);

@@ -6,8 +6,8 @@ type entry_metadata =
     {
         filename: string;
         atime: float option;
-        (* birthtime: float option; *)
-        (* ctime: float option; *)
+        birthtime: float option;
+        ctime: float option;
         mtime: float option;
         (* gid: int; *)
         (* gname: string; *)
@@ -45,6 +45,8 @@ external entry_pathname: entry -> string = "ost_entry_pathname"
 external entry_size: entry -> int option = "ost_entry_size"
 external entry_mtime: entry -> float option = "ost_entry_mtime"
 external entry_atime: entry -> float option = "ost_entry_atime"
+external entry_ctime: entry -> float option = "ost_entry_ctime"
+external entry_birthtime: entry -> float option = "ost_entry_birthtime"
 
 external write_new: unit -> archive = "ost_write_new"
 external write_open_memory: archive -> write_buffer_ptr -> written_ptr -> int = "ost_write_open_memory"
@@ -83,11 +85,15 @@ let read_meta_data entry =
         let size = entry_size entry in
         let mtime = entry_mtime entry in
         let atime = entry_atime entry in
+        let ctime = entry_ctime entry in
+        let birthtime = entry_birthtime entry in
         {
             filename = filename;
             size = size;
             mtime = mtime;
             atime = atime;
+            ctime = ctime;
+            birthtime = birthtime;
         }
 
 (* internal *)
