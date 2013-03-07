@@ -364,6 +364,26 @@ CAMLprim value ost_entry_gid(value e)
     return ost_entry_usergroup(e, archive_entry_gid);
 }
 
+CAMLprim value ost_entry_usergroupname(value e, const char* (*retrieve)(struct archive_entry *))
+{
+    entry* ent = Entry_val(e);
+    const char* name = retrieve(*ent);
+    if (name != NULL) {
+        return Val_some(caml_copy_string(name));
+    }
+    return Val_none;
+}
+
+CAMLprim value ost_entry_uname(value e)
+{
+    return ost_entry_usergroupname(e, archive_entry_uname);
+}
+
+CAMLprim value ost_entry_gname(value e)
+{
+    return ost_entry_usergroupname(e, archive_entry_gname);
+}
+
 CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
 {
     CAMLlocal1(ml_buff);

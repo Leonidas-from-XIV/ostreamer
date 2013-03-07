@@ -55,6 +55,10 @@ let _ =
         print_newline ();
         Printf.printf "File uid: %d\n" metadata.Archive.uid;
         Printf.printf "File gid: %d\n" metadata.Archive.gid;
+        Option.print (fun out e -> IO.nwrite out e) stdout metadata.Archive.uname;
+        print_newline ();
+        Option.print (fun out e -> IO.nwrite out e) stdout metadata.Archive.gname;
+        print_newline ();
         let uncompressed = Archive.read_entire_data readhandle in
         let read = String.length uncompressed in
         Printf.printf "read %d, uncompressed %s" read uncompressed;
