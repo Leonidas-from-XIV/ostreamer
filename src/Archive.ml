@@ -5,6 +5,7 @@ type written_ptr
 type entry_metadata =
     {
         filename: string;
+        filetype: Unix.file_kind;
         atime: float option;
         birthtime: float option;
         ctime: float option;
@@ -51,6 +52,7 @@ external entry_uid: entry -> int = "ost_entry_uid"
 external entry_gid: entry -> int = "ost_entry_gid"
 external entry_uname: entry -> string option = "ost_entry_uname"
 external entry_gname: entry -> string option = "ost_entry_gname"
+external entry_filetype: entry -> Unix.file_kind = "ost_entry_filetype"
 
 external write_new: unit -> archive = "ost_write_new"
 external write_open_memory: archive -> write_buffer_ptr -> written_ptr -> int = "ost_write_open_memory"
@@ -87,6 +89,7 @@ let read_entire_data archive =
 let read_meta_data entry =
         {
             filename = entry_pathname entry;
+            filetype = entry_filetype entry;
             size = entry_size entry;
             mtime = entry_mtime entry;
             atime = entry_atime entry;

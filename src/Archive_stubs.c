@@ -258,6 +258,25 @@ CAMLprim value ost_entry_set_filetype(value e, value t)
     return Val_unit;
 }
 
+CAMLprim value ost_entry_filetype(value e)
+{
+    entry* ent = Entry_val(e);
+    __LA_MODE_T mode = archive_entry_filetype(*ent);
+    int kind = 0;
+
+    switch (mode)
+    {
+        case AE_IFREG:
+            kind = S_REG;
+            break;
+        /* TODO rest */
+    }
+    /* TODO: fix _ost_file_kind */
+    kind -= 1;
+
+    return Val_int(kind);
+}
+
 CAMLprim value ost_read_next_header(value a, value e)
 {
     archive* handle = Archive_val(a);

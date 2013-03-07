@@ -16,6 +16,10 @@ let parse_commandline argv =
     let args = List.tl largv in
     bang_split args
 
+let regfilep = function
+        | Unix.S_REG -> "Regular file"
+        | _ -> "Something nonregular"
+
 let _ =
     print_endline (Printf.sprintf "ost-launch %d" (Archive.version_number ()));
     print_endline (Archive.version_string ());
@@ -43,6 +47,7 @@ let _ =
         Archive.print_pointer readentry;
         let metadata = (Archive.read_meta_data readentry) in
         Printf.printf "File name: %s\n" metadata.Archive.filename;
+        print_endline (regfilep metadata.Archive.filetype);
         Option.print (fun out e -> IO.nwrite out (string_of_int e)) stdout metadata.Archive.size;
         print_newline ();
         Option.print (fun out e -> IO.nwrite out (string_of_float e)) stdout metadata.Archive.mtime;
