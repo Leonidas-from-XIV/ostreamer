@@ -53,6 +53,8 @@ let _ =
         print_newline ();
         Option.print (fun out e -> IO.nwrite out (string_of_float e)) stdout metadata.Archive.birthtime;
         print_newline ();
+        Printf.printf "File uid: %d\n" metadata.Archive.uid;
+        Printf.printf "File gid: %d\n" metadata.Archive.gid;
         let uncompressed = Archive.read_entire_data readhandle in
         let read = String.length uncompressed in
         Printf.printf "read %d, uncompressed %s" read uncompressed;

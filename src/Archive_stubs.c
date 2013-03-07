@@ -346,6 +346,24 @@ CAMLprim value ost_entry_birthtime(value e)
             archive_entry_birthtime);
 }
 
+CAMLprim value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(struct archive_entry *))
+{
+    entry* ent = Entry_val(e);
+    __LA_INT64_T val = retrieve(*ent);
+    /* TODO int64 */
+    return Val_int(val);
+}
+
+CAMLprim value ost_entry_uid(value e)
+{
+    return ost_entry_usergroup(e, archive_entry_uid);
+}
+
+CAMLprim value ost_entry_gid(value e)
+{
+    return ost_entry_usergroup(e, archive_entry_gid);
+}
+
 CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
 {
     CAMLlocal1(ml_buff);

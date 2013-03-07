@@ -9,10 +9,10 @@ type entry_metadata =
         birthtime: float option;
         ctime: float option;
         mtime: float option;
-        (* gid: int; *)
+        gid: int;
         (* gname: string; *)
         size: int option;
-        (* uid: int; *)
+        uid: int;
         (* uname: string; *)
     }
 
@@ -47,6 +47,8 @@ external entry_mtime: entry -> float option = "ost_entry_mtime"
 external entry_atime: entry -> float option = "ost_entry_atime"
 external entry_ctime: entry -> float option = "ost_entry_ctime"
 external entry_birthtime: entry -> float option = "ost_entry_birthtime"
+external entry_uid: entry -> int = "ost_entry_uid"
+external entry_gid: entry -> int = "ost_entry_gid"
 
 external write_new: unit -> archive = "ost_write_new"
 external write_open_memory: archive -> write_buffer_ptr -> written_ptr -> int = "ost_write_open_memory"
@@ -88,6 +90,8 @@ let read_meta_data entry =
             atime = entry_atime entry;
             ctime = entry_ctime entry;
             birthtime = entry_birthtime entry;
+            uid = entry_uid entry;
+            gid = entry_gid entry;
         }
 
 (* internal *)
