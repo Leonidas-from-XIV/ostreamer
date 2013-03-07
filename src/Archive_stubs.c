@@ -301,7 +301,7 @@ CAMLprim value ost_entry_size(value e)
     if (archive_entry_size_is_set(*ent)) {
         size = archive_entry_size(*ent);
         /* TODO: wrap in better thing than Int_val, 64 bit */
-        return Val_some(Int_val(size));
+        return Val_some(Val_int(size));
     }
     return Val_none;
 }
