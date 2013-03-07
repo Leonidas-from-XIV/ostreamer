@@ -306,13 +306,15 @@ CAMLprim value ost_entry_size(value e)
     return Val_none;
 }
 
-CAMLprim value ost_entry_mtime(value e)
+/* get the entry, the callback to check for existance and the callback to get the value */
+CAMLprim value ost_entry_read_time(value e, int (*check)(struct archive_entry *),
+        time_t (*retrieve)(struct archive_entry*))
 {
     entry* ent = Entry_val(e);
     double unixtime;
     time_t t;
-    if (archive_entry_mtime_is_set(*ent)) {
-        t = archive_entry_mtime(*ent);
+    if (check(*ent)) {
+        t = retrieve(*ent);
         /* TODO: unportable */
         unixtime = (double)t;
         return Val_some(caml_copy_double(unixtime));
@@ -320,18 +322,16 @@ CAMLprim value ost_entry_mtime(value e)
     return Val_none;
 }
 
+CAMLprim value ost_entry_mtime(value e)
+{
+    return ost_entry_read_time(e, archive_entry_mtime_is_set,
+            archive_entry_mtime);
+}
+
 CAMLprim value ost_entry_atime(value e)
 {
-    entry* ent = Entry_val(e);
-    double unixtime;
-    time_t t;
-    if (archive_entry_atime_is_set(*ent)) {
-        t = archive_entry_atime(*ent);
-        /* TODO: unportable */
-        unixtime = (double)t;
-        return Val_some(caml_copy_double(unixtime));
-    }
-    return Val_none;
+    return ost_entry_read_time(e, archive_entry_atime_is_set,
+            archive_entry_atime);
 }
 
 CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
