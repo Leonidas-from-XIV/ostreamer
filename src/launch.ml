@@ -41,7 +41,9 @@ let _ =
         (* Printf.printf "error %s\n" (Archive.error_string handle); *)
         ignore (Archive.read_next_header readhandle readentry);
         Archive.print_pointer readentry;
-        print_endline (Archive.entry_pathname readentry);
+        let metadata = (Archive.read_meta_data readentry) in
+        Printf.printf "File name: %s\n" metadata.Archive.filename;
+        Option.print (fun out element -> Printf.fprintf out "Size %d\n" element) stdout metadata.Archive.size;
         let uncompressed = Archive.read_entire_data readhandle in
         let read = String.length uncompressed in
         Printf.printf "read %d, uncompressed %s" read uncompressed;

@@ -2,6 +2,19 @@ type archive
 type entry
 type write_buffer_ptr
 type written_ptr
+type entry_metadata =
+    {
+        filename: string;
+        (* atime: float option; *)
+        (* birthtime: float option; *)
+        (* ctime: float option; *)
+        (* mtime: float option; *)
+        (* gid: int; *)
+        (* gname: string; *)
+        size: int option;
+        (* uid: int; *)
+        (* uname: string; *)
+    }
 
 type status =
     | Ok
@@ -29,6 +42,7 @@ external read_data_block: archive -> string ref -> int ref -> int ref -> int = "
 external entry_new: unit -> entry = "ost_entry_new"
 external entry_set_filetype: entry -> Unix.file_kind -> unit = "ost_entry_set_filetype"
 external entry_pathname: entry -> string = "ost_entry_pathname"
+external entry_size: entry -> int option = "ost_entry_size"
 
 external write_new: unit -> archive = "ost_write_new"
 external write_open_memory: archive -> write_buffer_ptr -> written_ptr -> int = "ost_write_open_memory"
@@ -61,6 +75,14 @@ let read_entire_data archive =
         (* Only add as many bytes to the buffer as were read *)
         Buffer.add_string buffer (String.sub !c_buffer 0 !read);
         Buffer.contents buffer
+
+let read_meta_data entry =
+        let filename = entry_pathname entry in
+        let size = entry_size entry in
+        {
+            filename = filename;
+            size = size;
+        }
 
 (* internal *)
 let rec chunks str size = match String.length str with

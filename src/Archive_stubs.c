@@ -284,6 +284,28 @@ CAMLprim value ost_entry_pathname(value e)
     return caml_copy_string(name);
 }
 
+#define Val_none Val_int(0)
+
+static value Val_some(value v)
+{
+    CAMLlocal1(some);
+    some = caml_alloc(1, 0);
+    Store_field(some, 0, v);
+    return some;
+}
+
+CAMLprim value ost_entry_size(value e)
+{
+    entry* ent = Entry_val(e);
+    __LA_INT64_T size;
+    if (archive_entry_size_is_set(*ent)) {
+        size = archive_entry_size(*ent);
+        /* TODO: wrap in better thing than Int_val, 64 bit */
+        return Val_some(Int_val(size));
+    }
+    return Val_none;
+}
+
 CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
 {
     CAMLlocal1(ml_buff);
