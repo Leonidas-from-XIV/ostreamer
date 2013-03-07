@@ -81,19 +81,13 @@ let read_entire_data archive =
         Buffer.contents buffer
 
 let read_meta_data entry =
-        let filename = entry_pathname entry in
-        let size = entry_size entry in
-        let mtime = entry_mtime entry in
-        let atime = entry_atime entry in
-        let ctime = entry_ctime entry in
-        let birthtime = entry_birthtime entry in
         {
-            filename = filename;
-            size = size;
-            mtime = mtime;
-            atime = atime;
-            ctime = ctime;
-            birthtime = birthtime;
+            filename = entry_pathname entry;
+            size = entry_size entry;
+            mtime = entry_mtime entry;
+            atime = entry_atime entry;
+            ctime = entry_ctime entry;
+            birthtime = entry_birthtime entry;
         }
 
 (* internal *)
