@@ -306,6 +306,34 @@ CAMLprim value ost_entry_size(value e)
     return Val_none;
 }
 
+CAMLprim value ost_entry_mtime(value e)
+{
+    entry* ent = Entry_val(e);
+    double unixtime;
+    time_t t;
+    if (archive_entry_mtime_is_set(*ent)) {
+        t = archive_entry_mtime(*ent);
+        /* TODO: unportable */
+        unixtime = (double)t;
+        return Val_some(caml_copy_double(unixtime));
+    }
+    return Val_none;
+}
+
+CAMLprim value ost_entry_atime(value e)
+{
+    entry* ent = Entry_val(e);
+    double unixtime;
+    time_t t;
+    if (archive_entry_atime_is_set(*ent)) {
+        t = archive_entry_atime(*ent);
+        /* TODO: unportable */
+        unixtime = (double)t;
+        return Val_some(caml_copy_double(unixtime));
+    }
+    return Val_none;
+}
+
 CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
 {
     CAMLlocal1(ml_buff);

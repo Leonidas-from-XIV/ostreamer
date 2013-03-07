@@ -44,6 +44,11 @@ let _ =
         let metadata = (Archive.read_meta_data readentry) in
         Printf.printf "File name: %s\n" metadata.Archive.filename;
         Option.print (fun out e -> IO.nwrite out (string_of_int e)) stdout metadata.Archive.size;
+        print_newline ();
+        Option.print (fun out e -> IO.nwrite out (string_of_float e)) stdout metadata.Archive.mtime;
+        print_newline ();
+        Option.print (fun out e -> IO.nwrite out (string_of_float e)) stdout metadata.Archive.atime;
+        print_newline ();
         let uncompressed = Archive.read_entire_data readhandle in
         let read = String.length uncompressed in
         Printf.printf "read %d, uncompressed %s" read uncompressed;
