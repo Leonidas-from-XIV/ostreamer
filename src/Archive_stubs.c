@@ -233,9 +233,64 @@ CAMLprim value ost_write_set_format_raw(value a)
     return Val_int(map_errorcode(retval));
 }
 
+CAMLprim value ost_write_add_filter_b64encode(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_b64encode);
+}
+
+CAMLprim value ost_write_add_filter_bzip2(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_bzip2);
+}
+
+CAMLprim value ost_write_add_filter_compress(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_compress);
+}
+
+CAMLprim value ost_write_add_filter_grzip(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_grzip);
+}
+
 CAMLprim value ost_write_add_filter_gzip(value a)
 {
     return ost_archive_configure(a, archive_write_add_filter_gzip);
+}
+
+CAMLprim value ost_write_add_filter_lrzip(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_lrzip);
+}
+
+CAMLprim value ost_write_add_filter_lzip(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_lzip);
+}
+
+CAMLprim value ost_write_add_filter_lzma(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_lzma);
+}
+
+CAMLprim value ost_write_add_filter_lzop(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_lzop);
+}
+
+CAMLprim value ost_write_add_filter_none(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_none);
+}
+
+CAMLprim value ost_write_add_filter_uuencode(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_uuencode);
+}
+
+CAMLprim value ost_write_add_filter_xz(value a)
+{
+    return ost_archive_configure(a, archive_write_add_filter_xz);
 }
 
 void dump_buffer(char* buffer, size_t len)
