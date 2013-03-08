@@ -4,7 +4,7 @@ type write_buffer_ptr
 type written_ptr
 type entry_metadata =
     {
-        filename: string;
+        pathname: string;
         filetype: Unix.file_kind;
         atime: float option;
         birthtime: float option;
@@ -16,6 +16,8 @@ type entry_metadata =
         uid: int;
         uname: string option;
     }
+
+type ost_entry = File of string * entry_metadata | Directory of entry_metadata
 
 type status =
     | Ok
@@ -36,7 +38,7 @@ external read_support_filter_all: archive -> int = "ost_read_support_filter_all"
 external read_support_format_all: archive -> int = "ost_read_support_format_all"
 external read_support_format_raw: archive -> int = "ost_read_support_format_raw"
 external read_open_memory: archive -> string -> int -> int = "ost_read_open_memory"
-external read_next_header: archive -> entry -> int = "ost_read_next_header"
+external read_next_header: archive -> entry -> status = "ost_read_next_header"
 external read_data: archive -> string ref -> int -> int = "ost_read_data"
 external read_data_block: archive -> string ref -> int ref -> int ref -> int = "ost_read_data_block"
 
@@ -88,7 +90,7 @@ let read_entire_data archive =
 
 let read_meta_data entry =
         {
-            filename = entry_pathname entry;
+            pathname = entry_pathname entry;
             filetype = entry_filetype entry;
             size = entry_size entry;
             mtime = entry_mtime entry;
@@ -100,6 +102,22 @@ let read_meta_data entry =
             gname = entry_gname entry;
             uname = entry_uname entry;
         }
+
+let rec foo_inner archive entry =
+    let err = read_next_header archive entry in
+    match err with
+        | Ok -> let metadata = read_meta_data entry in
+                (match metadata.filetype with
+                        | Unix.S_REG -> let content = read_entire_data archive in
+                                (File (content, metadata))::(foo_inner archive entry)
+                        | Unix.S_DIR -> (Directory metadata)::(foo_inner archive entry)
+                        | _ -> (foo_inner archive entry))
+        | Eof -> []
+        | _ -> []
+
+let extract_all archive =
+    let entry_handle = entry_new () in
+    foo_inner archive entry_handle
 
 (* internal *)
 let rec chunks str size = match String.length str with

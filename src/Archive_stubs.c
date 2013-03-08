@@ -232,7 +232,7 @@ void ost_entry_free(value e)
 
 /* TODO: check if this is accessible directly from a header file */
 typedef enum _ost_file_kind {
-    S_REG = 1,
+    S_REG,
     S_DIR,
     S_CHR,
     S_BLK,
@@ -244,13 +244,18 @@ typedef enum _ost_file_kind {
 CAMLprim value ost_entry_set_filetype(value e, value t)
 {
     entry* entry = Entry_val(e);
+    int ocaml_type = Int_val(t);
     unsigned int type = 0;
 
-    switch (Int_val(t))
+    switch (ocaml_type)
     {
         case S_REG:
             type = AE_IFREG;
             break;
+        case S_DIR:
+            type = AE_IFDIR;
+            break;
+        /* TODO: others */
     }
 
     archive_entry_set_filetype(*entry, type);
@@ -269,12 +274,57 @@ CAMLprim value ost_entry_filetype(value e)
         case AE_IFREG:
             kind = S_REG;
             break;
-        /* TODO rest */
+        case AE_IFDIR:
+            kind = S_DIR;
+            break;
+        case AE_IFCHR:
+            kind = S_CHR;
+            break;
+        case AE_IFBLK:
+            kind = S_BLK;
+            break;
+        case AE_IFLNK:
+            kind = S_LNK;
+            break;
+        case AE_IFIFO:
+            kind = S_FIFO;
+            break;
+        case AE_IFSOCK:
+            kind = S_SOCK;
+            break;
     }
-    /* TODO: fix _ost_file_kind */
-    kind -= 1;
 
     return Val_int(kind);
+}
+
+typedef enum _ost_status {
+    OST_OK,
+    OST_EOF,
+    OST_RETRY,
+    OST_WARN,
+    OST_FAILED,
+    OST_FATAL
+} ost_status;
+
+static int map_errorcode(int retval)
+{
+    /*printf("Map errorcode: %d\n", retval);*/
+    switch (retval)
+    {
+        case ARCHIVE_OK:
+            return OST_OK;
+        case ARCHIVE_EOF:
+            return OST_EOF;
+        case ARCHIVE_RETRY:
+            return OST_RETRY;
+        case ARCHIVE_WARN:
+            return OST_WARN;
+        case ARCHIVE_FAILED:
+            return OST_FAILED;
+        case ARCHIVE_FATAL:
+            return OST_FATAL;
+    }
+    return OST_FATAL;
 }
 
 CAMLprim value ost_read_next_header(value a, value e)
@@ -283,7 +333,7 @@ CAMLprim value ost_read_next_header(value a, value e)
     entry* ent = Entry_val(e);
 
     int retval = archive_read_next_header(*handle, ent);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_read_data(value a, value buff, value size)
