@@ -103,25 +103,27 @@ void ost_read_free(value a)
     archive_read_free(*handle);
 }
 
-CAMLprim value ost_read_support_filter_all(value a)
+/* for setting filters/formats */
+static CAMLprim value ost_archive_configure(value a, int (*set)(struct archive*))
 {
     archive* handle = Archive_val(a);
-    int retval = archive_read_support_filter_all(*handle);
+    int retval = set(*handle);
     return Val_int(map_errorcode(retval));
+}
+
+CAMLprim value ost_read_support_filter_all(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_all);
 }
 
 CAMLprim value ost_read_support_format_all(value a)
 {
-    archive* handle = Archive_val(a);
-    int retval = archive_read_support_format_all(*handle);
-    return Val_int(map_errorcode(retval));
+    return ost_archive_configure(a, archive_read_support_format_all);
 }
 
 CAMLprim value ost_read_support_format_raw(value a)
 {
-    archive* handle = Archive_val(a);
-    int retval = archive_read_support_format_raw(*handle);
-    return Val_int(map_errorcode(retval));
+    return ost_archive_configure(a, archive_read_support_format_raw);
 }
 
 CAMLprim value ost_write_new(value unit)
@@ -224,6 +226,8 @@ CAMLprim value ost_write_close(value a)
 
 CAMLprim value ost_write_set_format_raw(value a)
 {
+    /* TODO: replace by simpler callback version when libarchive ships
+     * the new header with archive_write_set_format_raw */
     archive* handle = Archive_val(a);
     int retval = archive_write_set_format_raw(*handle);
     return Val_int(map_errorcode(retval));
@@ -231,9 +235,7 @@ CAMLprim value ost_write_set_format_raw(value a)
 
 CAMLprim value ost_write_add_filter_gzip(value a)
 {
-    archive* handle = Archive_val(a);
-    int retval = archive_write_add_filter_gzip(*handle);
-    return Val_int(map_errorcode(retval));
+    return ost_archive_configure(a, archive_write_add_filter_gzip);
 }
 
 void dump_buffer(char* buffer, size_t len)
