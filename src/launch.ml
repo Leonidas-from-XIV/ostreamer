@@ -78,22 +78,20 @@ let _ =
         match regular with
                 | Archive.File (uncompressed, metadata) -> (
                         print_metadata metadata;
-        let read = String.length uncompressed in
-        Printf.printf "read %d, uncompressed %s" read uncompressed;
-        (* write stuff *)
-        ignore (Archive.write_set_format_raw writehandle);
-        ignore (Archive.write_add_filter_gzip writehandle);
-        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
-        ignore (Archive.write_open_memory writehandle compressed written);
-        Archive.print_pointer writeentry;
-        Archive.entry_set_filetype writeentry Unix.S_REG;
-        ignore (Archive.write_header writehandle writeentry);
-        Archive.print_pointer writeentry;
-        ignore (Archive.write_data writehandle uncompressed read);
-        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
-        ignore (Archive.write_close writehandle);
-        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
-        File.with_file_out output_file (fun f_out ->
-            IO.nwrite f_out (Archive.write_buffer_read compressed written))
-                )
+                        Printf.printf "uncompressed %s" uncompressed;
+                        (* write stuff *)
+                        ignore (Archive.write_set_format_raw writehandle);
+                        ignore (Archive.write_add_filter_gzip writehandle);
+                        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
+                        ignore (Archive.write_open_memory writehandle compressed written);
+                        Archive.print_pointer writeentry;
+                        Archive.entry_set_filetype writeentry Unix.S_REG;
+                        ignore (Archive.write_header writehandle writeentry);
+                        Archive.print_pointer writeentry;
+                        ignore (Archive.write_entire_data writehandle uncompressed);
+                        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
+                        ignore (Archive.write_close writehandle);
+                        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
+                        File.with_file_out output_file (fun f_out ->
+                            IO.nwrite f_out (Archive.write_buffer_read compressed written)))
                 | Archive.Directory metadata -> ()

@@ -124,14 +124,12 @@ let extract_all archive =
     read_all ()
 
 (* internal *)
+(*
 let rec chunks str size = match String.length str with
         | n when n <= size -> [str]
         | n -> (String.sub str 0 size)::(chunks (String.sub str size (n-size)) size)
-
-(*
-let write_entire_data archive content =
-        let c_buffer_size = 1024 in
-        let c_buffer = ref (String.create c_buffer_size) in
-        let chk = chunks content c_buffer_size in
-        "TODO"
 *)
+
+let write_entire_data archive content =
+    let length = String.length content in
+    write_data archive content length
