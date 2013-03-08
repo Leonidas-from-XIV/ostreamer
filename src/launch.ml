@@ -48,7 +48,6 @@ let print_metadata metadata =
         Option.print (fun out e -> IO.nwrite out e) stdout metadata.Archive.gname;
         print_newline ()
 
-
 let _ =
     print_endline (Printf.sprintf "ost-launch %d" (Archive.version_number ()));
     print_endline (Archive.version_string ());
@@ -62,7 +61,6 @@ let _ =
     let writehandle = Archive.write_new () in
     let compressed = Archive.write_buffer_new () in
     let written = Archive.written_ptr_new () in
-    let writeentry = Archive.entry_new () in
         ignore (Archive.read_support_filter_all readhandle);
         ignore (Archive.read_support_format_all readhandle);
         ignore (Archive.read_support_format_raw readhandle);
@@ -84,11 +82,7 @@ let _ =
                         ignore (Archive.write_add_filter_gzip writehandle);
                         Printf.printf "outused %d\n" (Archive.written_ptr_read written);
                         ignore (Archive.write_open_memory writehandle compressed written);
-                        Archive.print_pointer writeentry;
-                        Archive.entry_set_filetype writeentry Unix.S_REG;
-                        ignore (Archive.write_header writehandle writeentry);
-                        Archive.print_pointer writeentry;
-                        ignore (Archive.write_entire_data writehandle uncompressed);
+                        Archive.write_file writehandle (Archive.File (uncompressed, metadata));
                         Printf.printf "outused %d\n" (Archive.written_ptr_read written);
                         ignore (Archive.write_close writehandle);
                         Printf.printf "outused %d\n" (Archive.written_ptr_read written);

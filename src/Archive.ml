@@ -132,4 +132,17 @@ let rec chunks str size = match String.length str with
 
 let write_entire_data archive content =
     let length = String.length content in
-    write_data archive content length
+    ignore (write_data archive content length)
+
+let set_metadata entry meta =
+    (* entry_set_pathname meta.pathname; *)
+    entry_set_filetype entry meta.filetype
+
+let write_file archive file =
+    let entry = entry_new () in
+    match file with
+        | File (content, metadata) ->
+                set_metadata entry metadata;
+                ignore (write_header archive entry);
+                write_entire_data archive content
+        | Directory metadata -> ()
