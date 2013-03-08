@@ -378,7 +378,7 @@ CAMLprim value ost_entry_size(value e)
 }
 
 /* get the entry, the callback to check for existance and the callback to get the value */
-CAMLprim value ost_entry_read_time(value e, int (*check)(struct archive_entry *),
+static CAMLprim value ost_entry_read_time(value e, int (*check)(struct archive_entry *),
         time_t (*retrieve)(struct archive_entry*))
 {
     entry* ent = Entry_val(e);
@@ -417,7 +417,7 @@ CAMLprim value ost_entry_birthtime(value e)
             archive_entry_birthtime);
 }
 
-CAMLprim value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(struct archive_entry *))
+static CAMLprim value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(struct archive_entry *))
 {
     entry* ent = Entry_val(e);
     __LA_INT64_T val = retrieve(*ent);
@@ -435,7 +435,7 @@ CAMLprim value ost_entry_gid(value e)
     return ost_entry_usergroup(e, archive_entry_gid);
 }
 
-CAMLprim value ost_entry_usergroupname(value e, const char* (*retrieve)(struct archive_entry *))
+static CAMLprim value ost_entry_usergroupname(value e, const char* (*retrieve)(struct archive_entry *))
 {
     entry* ent = Entry_val(e);
     const char* name = retrieve(*ent);
