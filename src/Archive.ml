@@ -103,21 +103,25 @@ let read_meta_data entry =
             uname = entry_uname entry;
         }
 
-let rec foo_inner archive entry =
-    let err = read_next_header archive entry in
-    match err with
-        | Ok -> let metadata = read_meta_data entry in
-                (match metadata.filetype with
-                        | Unix.S_REG -> let content = read_entire_data archive in
-                                (File (content, metadata))::(foo_inner archive entry)
-                        | Unix.S_DIR -> (Directory metadata)::(foo_inner archive entry)
-                        | _ -> (foo_inner archive entry))
-        | Eof -> []
-        | _ -> []
 
 let extract_all archive =
-    let entry_handle = entry_new () in
-    foo_inner archive entry_handle
+    let entry = entry_new () in
+    (*
+     * go through the whole archive until you reach Eof and convert raw data
+     * into structured OCaml types
+     *)
+    let rec read_all () =
+        let err = read_next_header archive entry in
+        match err with
+            | Ok -> let metadata = read_meta_data entry in
+                    (match metadata.filetype with
+                            | Unix.S_REG -> let content = read_entire_data archive in
+                                    (File (content, metadata))::(read_all ())
+                            | Unix.S_DIR -> (Directory metadata)::(read_all ())
+                            | _ -> (read_all ()))
+            | Eof -> []
+            | _ -> [] in
+    read_all ()
 
 (* internal *)
 let rec chunks str size = match String.length str with
