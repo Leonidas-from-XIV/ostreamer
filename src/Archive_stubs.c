@@ -35,6 +35,47 @@ static struct custom_operations entry_ops = {
     deserialize: custom_deserialize_default
 };
 
+typedef enum _ost_status {
+    OST_OK,
+    OST_EOF,
+    OST_RETRY,
+    OST_WARN,
+    OST_FAILED,
+    OST_FATAL
+} ost_status;
+
+/* TODO: check if this is accessible directly from a header file */
+typedef enum _ost_file_kind {
+    S_REG,
+    S_DIR,
+    S_CHR,
+    S_BLK,
+    S_LNK,
+    S_FIFO,
+    S_SOCK
+} ost_file_kind;
+
+static int map_errorcode(int retval)
+{
+    /*printf("Map errorcode: %d\n", retval);*/
+    switch (retval)
+    {
+        case ARCHIVE_OK:
+            return OST_OK;
+        case ARCHIVE_EOF:
+            return OST_EOF;
+        case ARCHIVE_RETRY:
+            return OST_RETRY;
+        case ARCHIVE_WARN:
+            return OST_WARN;
+        case ARCHIVE_FAILED:
+            return OST_FAILED;
+        case ARCHIVE_FATAL:
+            return OST_FATAL;
+    }
+    return OST_FATAL;
+}
+
 CAMLprim value ost_version_number(value unit)
 {
     int version_number = archive_version_number();
@@ -66,21 +107,21 @@ CAMLprim value ost_read_support_filter_all(value a)
 {
     archive* handle = Archive_val(a);
     int retval = archive_read_support_filter_all(*handle);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_read_support_format_all(value a)
 {
     archive* handle = Archive_val(a);
     int retval = archive_read_support_format_all(*handle);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_read_support_format_raw(value a)
 {
     archive* handle = Archive_val(a);
     int retval = archive_read_support_format_raw(*handle);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_write_new(value unit)
@@ -100,7 +141,7 @@ CAMLprim value ost_write_open_memory(value a, value b, value w)
 
     int retval = ost_write_open_dynamic_memory(*handle, bufptr, wptr);
 
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_written_ptr_new(value u)
@@ -157,7 +198,7 @@ CAMLprim value ost_write_header(value a, value e)
     entry* entry = Entry_val(e);
 
     int retval = archive_write_header(*handle, *entry);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_write_data(value a, value b, value s)
@@ -168,31 +209,31 @@ CAMLprim value ost_write_data(value a, value b, value s)
     printf("Writing size: %zu\n", size);
     //fwrite(buffer, 1, size, stderr);
 
-    int retval = archive_write_data(*handle, buffer, size);
-    printf("Retval write_data = %d\n", retval);
+    int written = archive_write_data(*handle, buffer, size);
+    printf("Retval write_data = %d\n", written);
     printf("Error: %s\n", archive_error_string(*handle));
-    return Val_int(retval);
+    return Val_int(written);
 }
 
 CAMLprim value ost_write_close(value a)
 {
     archive* handle = Archive_val(a);
     int retval = archive_write_close(*handle);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_write_set_format_raw(value a)
 {
     archive* handle = Archive_val(a);
     int retval = archive_write_set_format_raw(*handle);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_write_add_filter_gzip(value a)
 {
     archive* handle = Archive_val(a);
     int retval = archive_write_add_filter_gzip(*handle);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 void dump_buffer(char* buffer, size_t len)
@@ -210,7 +251,7 @@ CAMLprim value ost_read_open_memory(value a, value buff, value size)
     char *buffer = String_val(buff);
     size_t len = Int_val(size);
     int retval = archive_read_open_memory(*handle, buffer, len);
-    return Val_int(retval);
+    return Val_int(map_errorcode(retval));
 }
 
 CAMLprim value ost_entry_new(value unit)
@@ -229,17 +270,6 @@ void ost_entry_free(value e)
     entry* ent = Entry_val(e);
     archive_entry_free(*ent);
 }
-
-/* TODO: check if this is accessible directly from a header file */
-typedef enum _ost_file_kind {
-    S_REG,
-    S_DIR,
-    S_CHR,
-    S_BLK,
-    S_LNK,
-    S_FIFO,
-    S_SOCK
-} ost_file_kind;
 
 CAMLprim value ost_entry_set_filetype(value e, value t)
 {
@@ -297,36 +327,6 @@ CAMLprim value ost_entry_filetype(value e)
     return Val_int(kind);
 }
 
-typedef enum _ost_status {
-    OST_OK,
-    OST_EOF,
-    OST_RETRY,
-    OST_WARN,
-    OST_FAILED,
-    OST_FATAL
-} ost_status;
-
-static int map_errorcode(int retval)
-{
-    /*printf("Map errorcode: %d\n", retval);*/
-    switch (retval)
-    {
-        case ARCHIVE_OK:
-            return OST_OK;
-        case ARCHIVE_EOF:
-            return OST_EOF;
-        case ARCHIVE_RETRY:
-            return OST_RETRY;
-        case ARCHIVE_WARN:
-            return OST_WARN;
-        case ARCHIVE_FAILED:
-            return OST_FAILED;
-        case ARCHIVE_FATAL:
-            return OST_FATAL;
-    }
-    return OST_FATAL;
-}
-
 CAMLprim value ost_read_next_header(value a, value e)
 {
     archive* handle = Archive_val(a);
@@ -342,8 +342,8 @@ CAMLprim value ost_read_data(value a, value buff, value size)
     char* buffer = (char*)Ref_val(buff);
     int s = Int_val(size);
 
-    int retval = archive_read_data(*handle, buffer, s);
-    return Val_int(retval);
+    int read = archive_read_data(*handle, buffer, s);
+    return Val_int(read);
 }
 
 CAMLprim value ost_entry_pathname(value e)
