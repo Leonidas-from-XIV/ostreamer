@@ -30,7 +30,8 @@ type status =
 type read_filter = AllFilterReader
 type read_format = AllFormatReader | RawFormatReader
 
-type write_filter = Base64FilterWriter | BZip2FilterWriter | CompressFilterWriter
+type write_filter = Base64FilterWriter | BZip2FilterWriter |
+CompressFilterWriter | GZipFilterWriter
 type write_format = RawFormatWriter
 
 external version_number: unit -> int = "ost_version_number"
@@ -171,7 +172,16 @@ let apply_read_format archive = function
         | AllFormatReader -> read_support_format_all archive
         | RawFormatReader -> read_support_format_raw archive
 
-let read_configured formats filters =
+let apply_write_filter archive = function
+        | Base64FilterWriter -> write_add_filter_b64encode archive
+        | BZip2FilterWriter -> write_add_filter_bzip2 archive
+        | CompressFilterWriter -> write_add_filter_compress archive
+        | GZipFilterWriter -> write_add_filter_gzip archive
+
+let apply_write_format archive = function
+        | RawFormatWriter -> write_set_format_raw archive
+
+let read_new_configured formats filters =
         let handle = read_new () in
         let format_status = List.map (apply_read_format handle) formats in
         let filter_status = List.map (apply_read_filter handle) filters in
@@ -179,4 +189,14 @@ let read_configured formats filters =
         ignore format_status;
         ignore filter_status;
         (* TODO: return configured_read_archive type *)
+        handle
+
+let write_new_configured format filters =
+        let handle = write_new () in
+        let format_status = apply_write_format handle format in
+        let filter_status = List.map (apply_write_filter handle) filters in
+        (* TODO: check return codes for != Ok *)
+        ignore format_status;
+        ignore filter_status;
+        (* TODO: return configured_write_archive type *)
         handle

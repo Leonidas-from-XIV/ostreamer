@@ -57,10 +57,11 @@ let _ =
     let f_in = File.open_in input_file in
     let content = IO.read_all f_in in
     let l = String.length content in
-    let readhandle = Archive.read_configured
+    let readhandle = Archive.read_new_configured
         [Archive.AllFormatReader; Archive.RawFormatReader]
         [Archive.AllFilterReader] in
-    let writehandle = Archive.write_new () in
+    let writehandle = Archive.write_new_configured Archive.RawFormatWriter
+        [Archive.GZipFilterWriter] in
     let compressed = Archive.write_buffer_new () in
     let written = Archive.written_ptr_new () in
         Printf.printf "l: %d bytes\n" l;
@@ -77,8 +78,6 @@ let _ =
                         print_metadata metadata;
                         Printf.printf "uncompressed %s" uncompressed;
                         (* write stuff *)
-                        ignore (Archive.write_set_format_raw writehandle);
-                        ignore (Archive.write_add_filter_gzip writehandle);
                         Printf.printf "outused %d\n" (Archive.written_ptr_read written);
                         ignore (Archive.write_open_memory writehandle compressed written);
                         Archive.write_file writehandle (Archive.File (uncompressed, metadata));
