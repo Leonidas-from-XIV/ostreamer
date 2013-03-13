@@ -30,8 +30,19 @@ type status =
 type read_filter = AllFilterReader
 type read_format = AllFormatReader | RawFormatReader
 
-type write_filter = Base64FilterWriter | BZip2FilterWriter |
-CompressFilterWriter | GZipFilterWriter
+type write_filter =
+        | Base64FilterWriter
+        | BZip2FilterWriter
+        | CompressFilterWriter
+        | GRZipFilterWriter
+        | GZipFilterWriter
+        | LRZipFilterWriter
+        | LZipFilterWriter
+        | LZMAFilterWriter
+        | LZOPFilterWriter
+        | NoneFilterWriter
+        | UUEncodeFilterWriter
+        | XZFilterWriter
 type write_format = RawFormatWriter
 
 external version_number: unit -> int = "ost_version_number"
@@ -176,7 +187,15 @@ let apply_write_filter archive = function
         | Base64FilterWriter -> write_add_filter_b64encode archive
         | BZip2FilterWriter -> write_add_filter_bzip2 archive
         | CompressFilterWriter -> write_add_filter_compress archive
+        | GRZipFilterWriter -> write_add_filter_grzip archive
         | GZipFilterWriter -> write_add_filter_gzip archive
+        | LRZipFilterWriter -> write_add_filter_lrzip archive
+        | LZipFilterWriter -> write_add_filter_lzip archive
+        | LZMAFilterWriter -> write_add_filter_lzma archive
+        | LZOPFilterWriter -> write_add_filter_lzop archive
+        | NoneFilterWriter -> write_add_filter_none archive
+        | UUEncodeFilterWriter -> write_add_filter_uuencode archive
+        | XZFilterWriter -> write_add_filter_xz archive
 
 let apply_write_format archive = function
         | RawFormatWriter -> write_set_format_raw archive
