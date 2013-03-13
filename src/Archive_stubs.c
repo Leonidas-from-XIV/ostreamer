@@ -542,6 +542,95 @@ CAMLprim value ost_entry_birthtime(value e)
             archive_entry_birthtime);
 }
 
+CAMLprim value ost_entry_set_pathname(value e, value p)
+{
+    entry* ent = Entry_val(e);
+    char* path = String_val(p);
+
+    archive_entry_set_pathname(*ent, path);
+    return Val_unit;
+}
+
+CAMLprim value ost_entry_set_size(value e, value s)
+{
+    entry* ent = Entry_val(e);
+    /* TODO better integer type or whatnot */
+    __LA_INT64_T size = Int_val(s);
+
+    archive_entry_set_size(*ent, size);
+    return Val_unit;
+}
+
+static CAMLprim value ost_entry_set_time(value e, value t, void (*set)(struct archive_entry*, time_t, long))
+{
+    entry* ent = Entry_val(e);
+    double sec = Double_val(t);
+    /* TODO, evil cast */
+    time_t ref = (time_t)sec;
+    /* TODO: yeah, exactly zero nanoseconds! */
+    set(*ent, ref, 0L);
+
+    return Val_unit;
+}
+
+CAMLprim value ost_entry_set_mtime(value e, value t)
+{
+    return ost_entry_set_time(e, t, archive_entry_set_mtime);
+}
+
+CAMLprim value ost_entry_set_atime(value e, value t)
+{
+    return ost_entry_set_time(e, t, archive_entry_set_atime);
+}
+
+CAMLprim value ost_entry_set_ctime(value e, value t)
+{
+    return ost_entry_set_time(e, t, archive_entry_set_ctime);
+}
+
+CAMLprim value ost_entry_set_birthtime(value e, value t)
+{
+    return ost_entry_set_time(e, t, archive_entry_set_birthtime);
+}
+
+static CAMLprim value ost_entry_set_usergroup(value e, value u, void (*set)(struct archive_entry*, __LA_INT64_T))
+{
+    entry* ent = Entry_val(e);
+    /* TODO int64 */
+    __LA_INT64_T val = Int_val(u);
+    set(*ent, val);
+    return Val_unit;
+}
+
+CAMLprim value ost_entry_set_uid(value e, value u)
+{
+    return ost_entry_set_usergroup(e, u, archive_entry_set_uid);
+}
+
+CAMLprim value ost_entry_set_gid(value e, value g)
+{
+    return ost_entry_set_usergroup(e, g, archive_entry_set_gid);
+}
+
+static CAMLprim value ost_entry_set_usergroupname(value e, value n, void (*set)(struct archive_entry*, const char*))
+{
+    entry* ent = Entry_val(e);
+    const char* name = String_val(n);
+    set(*ent, name);
+
+    return Val_unit;
+}
+
+CAMLprim value ost_entry_set_uname(value e, value n)
+{
+    return ost_entry_set_usergroupname(e, n, archive_entry_set_uname);
+}
+
+CAMLprim value ost_entry_set_gname(value e, value n)
+{
+    return ost_entry_set_usergroupname(e, n, archive_entry_set_gname);
+}
+
 static CAMLprim value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(struct archive_entry *))
 {
     entry* ent = Entry_val(e);
