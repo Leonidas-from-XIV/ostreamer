@@ -77,16 +77,16 @@ external read_data_block: archive -> string ref -> int ref -> int ref -> int = "
 
 external entry_new: unit -> entry = "ost_entry_new"
 external entry_set_filetype: entry -> Unix.file_kind -> unit = "ost_entry_set_filetype"
-external entry_set_pathname: entry -> Unix.file_kind -> unit = "ost_entry_set_pathname"
+external entry_set_pathname: entry -> string -> unit = "ost_entry_set_pathname"
 external entry_set_size: entry -> int -> unit = "ost_entry_set_size"
 external entry_set_mtime: entry -> float -> unit = "ost_entry_set_mtime"
 external entry_set_atime: entry -> float -> unit = "ost_entry_set_atime"
 external entry_set_ctime: entry -> float -> unit = "ost_entry_set_ctime"
 external entry_set_birthtime: entry -> float -> unit = "ost_entry_set_birthtime"
-external entry_set_uid: entry -> int = "ost_entry_set_uid"
-external entry_set_gid: entry -> int = "ost_entry_set_gid"
-external entry_set_uname: entry -> int = "ost_entry_set_uname"
-external entry_set_gname: entry -> int = "ost_entry_set_gname"
+external entry_set_uid: entry -> int -> unit = "ost_entry_set_uid"
+external entry_set_gid: entry -> int -> unit = "ost_entry_set_gid"
+external entry_set_uname: entry -> string -> unit = "ost_entry_set_uname"
+external entry_set_gname: entry -> string -> unit = "ost_entry_set_gname"
 external entry_pathname: entry -> string = "ost_entry_pathname"
 external entry_size: entry -> int option = "ost_entry_size"
 external entry_mtime: entry -> float option = "ost_entry_mtime"
@@ -191,20 +191,31 @@ let extract_all archive =
             | _ -> [] in
     read_all ()
 
-(* internal *)
-(*
-let rec chunks str size = match String.length str with
-        | n when n <= size -> [str]
-        | n -> (String.sub str 0 size)::(chunks (String.sub str size (n-size)) size)
-*)
 
 let write_entire_data archive content =
     let length = String.length content in
     ignore (write_data archive content length)
 
+(* inspired by Batteries' Option module, function may *)
+let may f = function
+        | Some content -> f content
+        | None -> ()
+
+(* sets all the fields that were passed in the metadata to the fields in the
+ * entry. unset option types are ignored
+ *)
 let set_metadata entry meta =
-    (* entry_set_pathname meta.pathname; *)
-    entry_set_filetype entry meta.filetype
+    entry_set_pathname entry meta.pathname;
+    entry_set_filetype entry meta.filetype;
+    may (entry_set_size entry) meta.size;
+    may (entry_set_mtime entry) meta.mtime;
+    may (entry_set_atime entry) meta.atime;
+    may (entry_set_ctime entry) meta.ctime;
+    may (entry_set_birthtime entry) meta.birthtime;
+    entry_set_uid entry meta.uid;
+    entry_set_gid entry meta.gid;
+    may (entry_set_uname entry) meta.uname;
+    may (entry_set_gname entry) meta.gname
 
 let write_file archive file =
     let entry = entry_new () in
