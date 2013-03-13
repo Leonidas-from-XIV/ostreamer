@@ -43,7 +43,22 @@ type write_filter =
         | NoneFilterWriter
         | UUEncodeFilterWriter
         | XZFilterWriter
-type write_format = RawFormatWriter
+type write_format =
+        | SevenZipFormatWriter
+        | ARBSDFormatWriter
+        | ARSVR4FormatWriter
+        | CPIOFormatWriter
+        | CPIONEWCFormatWriter
+        | GnuTARFormatWriter
+        | ISO9660FormatWriter
+        | MtreeFormatWriter
+        | PAXFormatWriter
+        | RawFormatWriter
+        | SharFormatWriter
+        | USTARFormatWriter
+        | V7TARFormatWriter
+        | XARFormatWriter
+        | ZipFormatWriter
 
 external version_number: unit -> int = "ost_version_number"
 external version_string: unit -> string = "ost_version_string"
@@ -77,7 +92,21 @@ external entry_filetype: entry -> Unix.file_kind = "ost_entry_filetype"
 external write_new: unit -> archive = "ost_write_new"
 external write_open_memory: archive -> write_buffer_ptr -> written_ptr -> status = "ost_write_open_memory"
 external write_header: archive -> entry -> status = "ost_write_header"
+external write_set_format_7zip: archive -> status = "ost_write_set_format_7zip"
+external write_set_format_ar_bsd: archive -> status = "ost_write_set_format_ar_bsd"
+external write_set_format_ar_svr4: archive -> status = "ost_write_set_format_ar_svr4"
+external write_set_format_cpio: archive -> status = "ost_write_set_format_cpio"
+external write_set_format_cpio_newc: archive -> status = "ost_write_set_format_cpio_newc"
+external write_set_format_gnutar: archive -> status = "ost_write_set_format_gnutar"
+external write_set_format_iso9660: archive -> status = "ost_write_set_format_iso9660"
+external write_set_format_mtree: archive -> status = "ost_write_set_format_mtree"
+external write_set_format_pax: archive -> status = "ost_write_set_format_pax"
 external write_set_format_raw: archive -> status = "ost_write_set_format_raw"
+external write_set_format_shar: archive -> status = "ost_write_set_format_shar"
+external write_set_format_ustar: archive -> status = "ost_write_set_format_ustar"
+external write_set_format_v7tar: archive -> status = "ost_write_set_format_v7tar"
+external write_set_format_xar: archive -> status = "ost_write_set_format_xar"
+external write_set_format_zip: archive -> status = "ost_write_set_format_zip"
 external write_add_filter_b64encode: archive -> status = "ost_write_add_filter_b64encode"
 external write_add_filter_bzip2: archive -> status = "ost_write_add_filter_bzip2"
 external write_add_filter_compress: archive -> status = "ost_write_add_filter_compress"
@@ -198,7 +227,21 @@ let apply_write_filter archive = function
         | XZFilterWriter -> write_add_filter_xz archive
 
 let apply_write_format archive = function
+        | SevenZipFormatWriter -> write_set_format_7zip archive
+        | ARBSDFormatWriter -> write_set_format_ar_bsd archive
+        | ARSVR4FormatWriter -> write_set_format_ar_svr4 archive
+        | CPIOFormatWriter -> write_set_format_cpio archive
+        | CPIONEWCFormatWriter -> write_set_format_cpio_newc archive
+        | GnuTARFormatWriter -> write_set_format_gnutar archive
+        | ISO9660FormatWriter -> write_set_format_iso9660 archive
+        | MtreeFormatWriter -> write_set_format_mtree archive
+        | PAXFormatWriter -> write_set_format_pax archive
         | RawFormatWriter -> write_set_format_raw archive
+        | SharFormatWriter -> write_set_format_shar archive
+        | USTARFormatWriter -> write_set_format_ustar archive
+        | V7TARFormatWriter -> write_set_format_v7tar archive
+        | XARFormatWriter -> write_set_format_xar archive
+        | ZipFormatWriter -> write_set_format_zip archive
 
 let read_new_configured formats filters =
         let handle = read_new () in

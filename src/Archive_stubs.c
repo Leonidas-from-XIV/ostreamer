@@ -224,6 +224,51 @@ CAMLprim value ost_write_close(value a)
     return Val_int(map_errorcode(retval));
 }
 
+CAMLprim value ost_write_set_format_7zip(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_7zip);
+}
+
+CAMLprim value ost_write_set_format_ar_bsd(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_ar_bsd);
+}
+
+CAMLprim value ost_write_set_format_ar_svr4(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_ar_svr4);
+}
+
+CAMLprim value ost_write_set_format_cpio(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_cpio);
+}
+
+CAMLprim value ost_write_set_format_cpio_newc(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_cpio_newc);
+}
+
+CAMLprim value ost_write_set_format_gnutar(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_gnutar);
+}
+
+CAMLprim value ost_write_set_format_iso9660(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_iso9660);
+}
+
+CAMLprim value ost_write_set_format_mtree(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_mtree);
+}
+
+CAMLprim value ost_write_set_format_pax(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_pax);
+}
+
 CAMLprim value ost_write_set_format_raw(value a)
 {
     /* TODO: replace by simpler callback version when libarchive ships
@@ -231,6 +276,31 @@ CAMLprim value ost_write_set_format_raw(value a)
     archive* handle = Archive_val(a);
     int retval = archive_write_set_format_raw(*handle);
     return Val_int(map_errorcode(retval));
+}
+
+CAMLprim value ost_write_set_format_shar(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_shar);
+}
+
+CAMLprim value ost_write_set_format_ustar(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_ustar);
+}
+
+CAMLprim value ost_write_set_format_v7tar(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_v7tar);
+}
+
+CAMLprim value ost_write_set_format_xar(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_xar);
+}
+
+CAMLprim value ost_write_set_format_zip(value a)
+{
+    return ost_archive_configure(a, archive_write_set_format_zip);
 }
 
 CAMLprim value ost_write_add_filter_b64encode(value a)
