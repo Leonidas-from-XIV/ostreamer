@@ -57,13 +57,12 @@ let _ =
     let f_in = File.open_in input_file in
     let content = IO.read_all f_in in
     let l = String.length content in
-    let readhandle = Archive.read_new () in
+    let readhandle = Archive.read_configured
+        [Archive.AllFormatReader; Archive.RawFormatReader]
+        [Archive.AllFilterReader] in
     let writehandle = Archive.write_new () in
     let compressed = Archive.write_buffer_new () in
     let written = Archive.written_ptr_new () in
-        ignore (Archive.read_support_filter_all readhandle);
-        ignore (Archive.read_support_format_all readhandle);
-        ignore (Archive.read_support_format_raw readhandle);
         Printf.printf "l: %d bytes\n" l;
         ignore (Archive.read_open_memory readhandle content l);
         let archive_contents = Archive.extract_all readhandle in

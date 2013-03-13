@@ -27,6 +27,12 @@ type status =
     | Failed
     | Fatal
 
+type read_filter = AllFilterReader
+type read_format = AllFormatReader | RawFormatReader
+
+type write_filter = Base64FilterWriter | BZip2FilterWriter | CompressFilterWriter
+type write_format = RawFormatWriter
+
 external version_number: unit -> int = "ost_version_number"
 external version_string: unit -> string = "ost_version_string"
 
@@ -157,3 +163,20 @@ let write_file archive file =
                 ignore (write_header archive entry);
                 write_entire_data archive content
         | Directory metadata -> ()
+
+let apply_read_filter archive = function
+        | AllFilterReader -> read_support_filter_all archive
+
+let apply_read_format archive = function
+        | AllFormatReader -> read_support_format_all archive
+        | RawFormatReader -> read_support_format_raw archive
+
+let read_configured formats filters =
+        let handle = read_new () in
+        let format_status = List.map (apply_read_format handle) formats in
+        let filter_status = List.map (apply_read_filter handle) filters in
+        (* TODO: check return codes for != Ok *)
+        ignore format_status;
+        ignore filter_status;
+        (* TODO: return configured_read_archive type *)
+        handle
