@@ -13,6 +13,13 @@ Library "ost"
   CCLib:      -larchive
   BuildTools: ocamlbuild
 
+Executable "ost-test"
+  Path:           test/
+  BuildTools:     ocamlbuild
+  CompiledObject: best
+  BuildDepends:   ost, oUnit
+  MainIs:         test_simple.ml
+
 Executable "ost-launch"
   Path:           src
   BuildTools:     ocamlbuild
