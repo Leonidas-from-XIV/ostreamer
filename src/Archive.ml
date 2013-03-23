@@ -1,4 +1,70 @@
-module Archive = struct
+module Archive : sig
+        type archive
+        type read_format = AllFormatReader | RawFormatReader
+        type read_filter = AllFilterReader
+        type write_filter =
+                | Base64FilterWriter
+                | BZip2FilterWriter
+                | CompressFilterWriter
+                | GRZipFilterWriter
+                | GZipFilterWriter
+                | LRZipFilterWriter
+                | LZipFilterWriter
+                | LZMAFilterWriter
+                | LZOPFilterWriter
+                | NoneFilterWriter
+                | UUEncodeFilterWriter
+                | XZFilterWriter
+        type write_format =
+                | SevenZipFormatWriter
+                | ARBSDFormatWriter
+                | ARSVR4FormatWriter
+                | CPIOFormatWriter
+                | CPIONEWCFormatWriter
+                | GnuTARFormatWriter
+                | ISO9660FormatWriter
+                | MtreeFormatWriter
+                | PAXFormatWriter
+                | RawFormatWriter
+                | SharFormatWriter
+                | USTARFormatWriter
+                | V7TARFormatWriter
+                | XARFormatWriter
+                | ZipFormatWriter
+        type entry_metadata =
+            {
+                pathname: string;
+                filetype: Unix.file_kind;
+                atime: float option;
+                birthtime: float option;
+                ctime: float option;
+                mtime: float option;
+                gid: int;
+                gname: string option;
+                size: int option;
+                uid: int;
+                uname: string option;
+            }
+        type ost_entry = File of string * entry_metadata | Directory of entry_metadata
+        type status
+        (* TODO: remove these from the interface *)
+        type write_buffer_ptr
+        type written_ptr
+        (* End of TODO *)
+        val version_string: unit -> string
+        val version_number: unit -> int
+        val read_new_configured: read_format list -> read_filter list -> archive
+        val write_new_configured: write_format -> write_filter list -> archive
+        val feed_data: archive -> string -> unit
+        val extract_all: archive -> ost_entry list
+        val write_buffer_new: unit -> write_buffer_ptr
+        val written_ptr_new: unit -> written_ptr
+        val written_ptr_read: written_ptr -> int
+        val write_open_memory: archive -> write_buffer_ptr -> written_ptr -> status
+        val write_file: archive -> ost_entry -> unit
+        val write_close: archive -> status
+        val write_buffer_read: write_buffer_ptr -> written_ptr -> string
+end = struct
 
 type archive
 type entry

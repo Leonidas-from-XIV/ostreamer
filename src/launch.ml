@@ -67,7 +67,7 @@ let _ =
     let compressed = Archive.write_buffer_new () in
     let written = Archive.written_ptr_new () in
         Printf.printf "l: %d bytes\n" l;
-        ignore (Archive.read_open_memory readhandle content l);
+        Archive.feed_data readhandle content;
         let archive_contents = Archive.extract_all readhandle in
         List.print (fun out e -> IO.nwrite out (filep e)) stdout archive_contents;
         print_newline ();
