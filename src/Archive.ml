@@ -171,6 +171,13 @@ let read_meta_data entry =
             uname = entry_uname entry;
         }
 
+let feed_data handle data =
+        let len = String.length data in
+        let ret = read_open_memory handle data len in
+        match ret with
+        | Ok -> ()
+        | _ -> ()
+        (* TODO: proper error handling *)
 
 let extract_all archive =
     let entry = entry_new () in
