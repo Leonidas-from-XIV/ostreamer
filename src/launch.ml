@@ -1,4 +1,6 @@
 open Batteries
+(* TODO: eliminate this prefix *)
+open Archive
 
 (* helper for reduce *)
 let bang_fold acc = function

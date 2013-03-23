@@ -1,3 +1,5 @@
+module Archive = struct
+
 type archive
 type entry
 type write_buffer_ptr
@@ -290,3 +292,5 @@ let write_new_configured format filters =
         ignore filter_status;
         (* TODO: return configured_write_archive type *)
         handle
+
+end

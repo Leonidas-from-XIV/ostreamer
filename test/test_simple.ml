@@ -1,4 +1,6 @@
 open OUnit
+(* TODO: eliminate this prefix *)
+open Archive
 
 let equ = assert_equal
 
