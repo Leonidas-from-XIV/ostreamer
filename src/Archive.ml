@@ -1,3 +1,13 @@
+module ErrorMonad = struct
+        type 'a t =
+                | Success of 'a
+                | Failure of int * string
+        let return x = Success x
+        let bind m f = match m with
+                | Success(x) -> f x
+                | Failure(i,s) -> Failure(i,s)
+end
+
 module Archive : sig
         type 'a t
         type read_format = AllFormatReader | RawFormatReader
@@ -213,6 +223,13 @@ external write_buffer_new: unit -> write_buffer_ptr = "ost_write_buffer_new"
 external write_buffer_read: write_buffer_ptr -> written_ptr -> string = "ost_write_buffer_read"
 external write_buffer_free: write_buffer_ptr -> unit = "ost_write_buffer_free"
 
+let archive_status_error_wrapper fn archive =
+        let retval = fn archive in
+        match retval with
+        | Ok -> ErrorMonad.Success(archive)
+        | _ -> let errcode = errno archive in
+                let errstr = error_string archive in
+                ErrorMonad.Failure(errcode, errstr)
 
 let read_entire_data archive =
         let c_buffer_size = 1024 in
@@ -305,11 +322,11 @@ let write_file archive file =
         | Directory metadata -> ()
 
 let apply_read_filter archive = function
-        | AllFilterReader -> read_support_filter_all archive
+        | AllFilterReader -> archive_status_error_wrapper read_support_filter_all archive
 
-let apply_read_format archive = function
-        | AllFormatReader -> read_support_format_all archive
-        | RawFormatReader -> read_support_format_raw archive
+let apply_read_format (fmt : read_format) (archive : archive) : archive ErrorMonad.t = match fmt with
+        | AllFormatReader -> archive_status_error_wrapper read_support_format_all archive
+        | RawFormatReader -> archive_status_error_wrapper read_support_format_raw archive
 
 let apply_write_filter archive = function
         | Base64FilterWriter -> write_add_filter_b64encode archive
@@ -344,12 +361,14 @@ let apply_write_format archive = function
 
 let read_new_configured formats filters =
         let handle = read_new () in
-        let format_status = List.map (apply_read_format handle) formats in
+        let format_status : archive ErrorMonad.t =
+                let folder (m: archive ErrorMonad.t) (fmt: read_format) : archive ErrorMonad.t =
+                        ErrorMonad.bind m (apply_read_format fmt) in
+                List.fold_left folder (ErrorMonad.Success handle) formats in
         let filter_status = List.map (apply_read_filter handle) filters in
         (* TODO: check return codes for != Ok *)
         ignore format_status;
         ignore filter_status;
-        (* TODO: return configured_read_archive type *)
         handle
 
 let write_new_configured format filters =
