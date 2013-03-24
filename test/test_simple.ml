@@ -19,8 +19,8 @@ let test_decompress_raw_single_file _ =
     let handle = Archive.read_new_configured
         [Archive.RawFormatReader]
         [Archive.AllFilterReader] in
-    Archive.feed_data handle raw_gz_file;
-    let archive_contents = Archive.extract_all handle in
+    let populated = Archive.feed_data handle raw_gz_file in
+    let archive_contents = Archive.extract_all populated in
     let first = List.hd archive_contents in
     match first with
         | Archive.File (content, meta) -> equ content raw_file

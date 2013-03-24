@@ -1,5 +1,5 @@
 module Archive : sig
-        type archive
+        type 'a t
         type read_format = AllFormatReader | RawFormatReader
         type read_filter = AllFilterReader
         type write_filter =
@@ -53,20 +53,23 @@ module Archive : sig
         (* End of TODO *)
         val version_string: unit -> string
         val version_number: unit -> int
-        val read_new_configured: read_format list -> read_filter list -> archive
-        val write_new_configured: write_format -> write_filter list -> archive
-        val feed_data: archive -> string -> unit
-        val extract_all: archive -> ost_entry list
+        val read_new_configured: read_format list -> read_filter list ->
+                [`Closed] t
+        val write_new_configured: write_format -> write_filter list -> [`Closed] t
+        val feed_data: [`Closed] t -> string -> [`Populated] t
+        val extract_all: [`Populated] t -> ost_entry list
         val write_buffer_new: unit -> write_buffer_ptr
         val written_ptr_new: unit -> written_ptr
         val written_ptr_read: written_ptr -> int
-        val write_open_memory: archive -> write_buffer_ptr -> written_ptr -> status
-        val write_file: archive -> ost_entry -> unit
-        val write_close: archive -> status
+        val write_open_memory: [`Closed] t -> write_buffer_ptr -> written_ptr -> status
+        (* TODO: change these signatures *)
+        val write_file: [`Closed] t -> ost_entry -> unit
+        val write_close: [`Closed] t -> status
         val write_buffer_read: write_buffer_ptr -> written_ptr -> string
 end = struct
 
 type archive
+type 'a t = archive
 type entry
 type write_buffer_ptr
 type written_ptr
@@ -243,8 +246,8 @@ let feed_data handle data =
         let len = String.length data in
         let ret = read_open_memory handle data len in
         match ret with
-        | Ok -> ()
-        | _ -> ()
+        | Ok -> handle
+        | _ -> handle
         (* TODO: proper error handling *)
 
 let extract_all archive =
