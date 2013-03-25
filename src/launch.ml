@@ -69,23 +69,24 @@ let _ =
         Printf.printf "l: %d bytes\n" l;
         let populated = Archive.feed_data readhandle content in
         let archive_contents = Archive.extract_all populated in
-        List.print (fun out e -> IO.nwrite out (filep e)) stdout archive_contents;
-        print_newline ();
-        let files = List.filter is_file archive_contents in
-        let regular = List.hd files in
-        (* Printf.printf "errno %d\n" (Archive.errno handle); *)
-        (* Printf.printf "error %s\n" (Archive.error_string handle); *)
-        match regular with
-                | Archive.File (uncompressed, metadata) -> (
-                        print_metadata metadata;
-                        Printf.printf "uncompressed %s" uncompressed;
-                        (* write stuff *)
-                        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
-                        ignore (Archive.write_open_memory writehandle compressed written);
-                        Archive.write_file writehandle (Archive.File (uncompressed, metadata));
-                        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
-                        ignore (Archive.write_close writehandle);
-                        Printf.printf "outused %d\n" (Archive.written_ptr_read written);
-                        File.with_file_out output_file (fun f_out ->
-                            IO.nwrite f_out (Archive.write_buffer_read compressed written)))
-                | Archive.Directory metadata -> ()
+        match archive_contents with
+        | ErrorMonad.Success (entries) ->
+                List.print (fun out e -> IO.nwrite out (filep e)) stdout entries;
+                print_newline ();
+                let files = List.filter is_file entries in
+                let regular = List.hd files in
+                (match regular with
+                        | Archive.File (uncompressed, metadata) -> (
+                                print_metadata metadata;
+                                Printf.printf "uncompressed %s" uncompressed;
+                                (* write stuff *)
+                                Printf.printf "outused %d\n" (Archive.written_ptr_read written);
+                                ignore (Archive.write_open_memory writehandle compressed written);
+                                Archive.write_file writehandle (Archive.File (uncompressed, metadata));
+                                Printf.printf "outused %d\n" (Archive.written_ptr_read written);
+                                ignore (Archive.write_close writehandle);
+                                Printf.printf "outused %d\n" (Archive.written_ptr_read written);
+                                File.with_file_out output_file (fun f_out ->
+                                    IO.nwrite f_out (Archive.write_buffer_read compressed written)))
+                        | Archive.Directory metadata -> ())
+        | ErrorMonad.Failure (code,str) -> ()

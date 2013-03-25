@@ -9,7 +9,8 @@ module ErrorMonad = struct
 end
 
 module Archive : sig
-        type 'a t
+        type 'a r
+        type 'a w
         type read_format = AllFormatReader | RawFormatReader
         type read_filter = AllFilterReader
         type write_filter =
@@ -63,23 +64,23 @@ module Archive : sig
         (* End of TODO *)
         val version_string: unit -> string
         val version_number: unit -> int
-        val read_new_configured: read_format list -> read_filter list ->
-                [`Closed] t
-        val write_new_configured: write_format -> write_filter list -> [`Closed] t
-        val feed_data: [`Closed] t -> string -> [`Populated] t
-        val extract_all: [`Populated] t -> ost_entry list
+        val read_new_configured: read_format list -> read_filter list -> [`Empty] r
+        val write_new_configured: write_format -> write_filter list -> [`Closed] w
+        val feed_data: [`Empty] r -> string -> [`Populated] r
+        val extract_all: [`Populated] r -> ost_entry list ErrorMonad.t
         val write_buffer_new: unit -> write_buffer_ptr
         val written_ptr_new: unit -> written_ptr
         val written_ptr_read: written_ptr -> int
-        val write_open_memory: [`Closed] t -> write_buffer_ptr -> written_ptr -> status
+        val write_open_memory: [`Closed] w -> write_buffer_ptr -> written_ptr -> status
         (* TODO: change these signatures *)
-        val write_file: [`Closed] t -> ost_entry -> unit
-        val write_close: [`Closed] t -> status
+        val write_file: [`Closed] w -> ost_entry -> unit
+        val write_close: [`Closed] w -> status
         val write_buffer_read: write_buffer_ptr -> written_ptr -> string
 end = struct
 
 type archive
-type 'a t = archive
+type 'a r = archive ErrorMonad.t
+type 'a w = archive
 type entry
 type write_buffer_ptr
 type written_ptr
@@ -259,7 +260,7 @@ let read_meta_data entry =
             uname = entry_uname entry;
         }
 
-let feed_data handle data =
+let feed_data_old handle data =
         let len = String.length data in
         let ret = read_open_memory handle data len in
         match ret with
@@ -267,24 +268,48 @@ let feed_data handle data =
         | _ -> handle
         (* TODO: proper error handling *)
 
-let extract_all archive =
-    let entry = entry_new () in
-    (*
-     * go through the whole archive until you reach Eof and convert raw data
-     * into structured OCaml types
-     *)
-    let rec read_all () =
-        let err = read_next_header archive entry in
-        match err with
-            | Ok -> let metadata = read_meta_data entry in
-                    (match metadata.filetype with
-                            | Unix.S_REG -> let content = read_entire_data archive in
-                                    (File (content, metadata))::(read_all ())
-                            | Unix.S_DIR -> (Directory metadata)::(read_all ())
-                            | _ -> (read_all ()))
-            | Eof -> []
-            | _ -> [] in
-    read_all ()
+let feed_data handlemonad data =
+        let feed_inner handle =
+                let len = String.length data in
+                let retval = read_open_memory handle data len in
+                match retval with
+                | Ok -> ErrorMonad.Success(handle)
+                | _ -> let errcode = errno handle in
+                        let errstr = error_string handle in
+                        ErrorMonad.Failure(errcode, errstr) in
+        ErrorMonad.bind handlemonad feed_inner
+
+let extract_all = function
+        | ErrorMonad.Success (archive) -> (let entry = entry_new () in
+            (*
+             * go through the whole archive until you reach Eof and convert raw data
+             * into structured OCaml types
+             *)
+            let rec read_all () : ost_entry list ErrorMonad.t =
+                let err = read_next_header archive entry in
+                match err with
+                    | Ok -> let metadata = read_meta_data entry in
+                            (match metadata.filetype with
+                                    | Unix.S_REG -> let content = read_entire_data archive in
+                                                let head = File (content, metadata) in
+                                                let tail = read_all () in
+                                                (match tail with
+                                                        | ErrorMonad.Success (cont) ->
+                                                                        ErrorMonad.Success (head::cont)
+                                                        | err -> err)
+                                    | Unix.S_DIR -> let head = Directory metadata in
+                                                let tail = read_all () in
+                                                (match tail with
+                                                        | ErrorMonad.Success (cont) ->
+                                                                        ErrorMonad.Success (head::cont)
+                                                        | err -> err)
+                                    | _ -> (read_all ()))
+                    | Eof -> ErrorMonad.Success ([])
+                    | _ -> let errcode = errno archive in
+                        let errstr = error_string archive in
+                        ErrorMonad.Failure(errcode, errstr) in
+            read_all ())
+        | ErrorMonad.Failure (code, str) -> ErrorMonad.Failure(code, str)
 
 
 let write_entire_data archive content =
@@ -321,7 +346,7 @@ let write_file archive file =
                 write_entire_data archive content
         | Directory metadata -> ()
 
-let apply_read_filter archive = function
+let apply_read_filter fmt archive = match fmt with
         | AllFilterReader -> archive_status_error_wrapper read_support_filter_all archive
 
 let apply_read_format (fmt : read_format) (archive : archive) : archive ErrorMonad.t = match fmt with
@@ -361,15 +386,14 @@ let apply_write_format archive = function
 
 let read_new_configured formats filters =
         let handle = read_new () in
-        let format_status : archive ErrorMonad.t =
+        let formatted_handle : archive ErrorMonad.t =
                 let folder (m: archive ErrorMonad.t) (fmt: read_format) : archive ErrorMonad.t =
                         ErrorMonad.bind m (apply_read_format fmt) in
                 List.fold_left folder (ErrorMonad.Success handle) formats in
-        let filter_status = List.map (apply_read_filter handle) filters in
-        (* TODO: check return codes for != Ok *)
-        ignore format_status;
-        ignore filter_status;
-        handle
+        let filtered_handle =
+                let folder m flt = ErrorMonad.bind m (apply_read_filter flt) in
+                List.fold_left folder formatted_handle filters in
+        filtered_handle
 
 let write_new_configured format filters =
         let handle = write_new () in

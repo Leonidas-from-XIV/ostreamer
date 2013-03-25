@@ -21,11 +21,17 @@ let test_decompress_raw_single_file _ =
         [Archive.AllFilterReader] in
     let populated = Archive.feed_data handle raw_gz_file in
     let archive_contents = Archive.extract_all populated in
-    let first = List.hd archive_contents in
-    match first with
-        | Archive.File (content, meta) -> equ content raw_file
-        | _ -> assert_failure "Did not get a single file"
+    match archive_contents with
+        | ErrorMonad.Success (xs) -> let first = List.hd xs in
+            (match first with
+            | Archive.File (content, meta) -> equ content raw_file
+            | _ -> assert_failure "Did not get a single file")
+        | ErrorMonad.Failure (code, str) -> assert_failure "Decompression failed"
 
+let test_nocompress_simple_file =
+    let handle = Archive.write_new_configured
+        Archive.RawFormatWriter [Archive.NoneFilterWriter] in
+    ()
 
 let suite = "Simple tests" >::: [
         "test_version_getting" >:: test_version_getting;
