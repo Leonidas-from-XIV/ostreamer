@@ -20,9 +20,9 @@ Executable "ost-test"
   BuildDepends:   ost, oUnit
   MainIs:         test_simple.ml
 
-Executable "ost-launch"
-  Path:           src
-  BuildTools:     ocamlbuild
-  CompiledObject: best
-  BuildDepends:   ost, batteries
-  MainIs:         launch.ml
+#Executable "ost-launch"
+#  Path:           src
+#  BuildTools:     ocamlbuild
+#  CompiledObject: best
+#  BuildDepends:   ost, batteries
+#  MainIs:         launch.ml

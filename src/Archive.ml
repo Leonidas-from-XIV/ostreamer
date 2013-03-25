@@ -57,33 +57,23 @@ module Archive : sig
                 uname: string option;
             }
         type ost_entry = File of string * entry_metadata | Directory of entry_metadata
-        type status
-        (* TODO: remove these from the interface *)
-        type write_buffer_ptr
-        type written_ptr
-        (* End of TODO *)
         val version_string: unit -> string
         val version_number: unit -> int
         val read_new_configured: read_format list -> read_filter list -> [`Empty] r
-        val write_new_configured: write_format -> write_filter list -> [`Closed] w
         val feed_data: [`Empty] r -> string -> [`Populated] r
         val extract_all: [`Populated] r -> ost_entry list ErrorMonad.t
-        val write_buffer_new: unit -> write_buffer_ptr
-        val written_ptr_new: unit -> written_ptr
-        val written_ptr_read: written_ptr -> int
-        val write_open_memory: [`Closed] w -> write_buffer_ptr -> written_ptr -> status
-        (* TODO: change these signatures *)
-        val write_file: [`Closed] w -> ost_entry -> unit
-        val write_close: [`Closed] w -> status
-        val write_buffer_read: write_buffer_ptr -> written_ptr -> string
+        val write_new_configured: write_format -> write_filter list -> [`Closed] w
+        val write_open_memory: [`Closed] w -> [`Open] w
+        val write_entry: [`Open] w -> ost_entry -> [`Open] w
+        val write_close: [`Open] w -> string ErrorMonad.t
 end = struct
 
 type archive
 type 'a r = archive ErrorMonad.t
-type 'a w = archive
-type entry
 type write_buffer_ptr
 type written_ptr
+type 'a w = (archive * write_buffer_ptr * written_ptr) ErrorMonad.t
+type entry
 type entry_metadata =
     {
         pathname: string;
@@ -182,7 +172,7 @@ external entry_gname: entry -> string option = "ost_entry_gname"
 external entry_filetype: entry -> Unix.file_kind = "ost_entry_filetype"
 
 external write_new: unit -> archive = "ost_write_new"
-external write_open_memory: archive -> write_buffer_ptr -> written_ptr -> status = "ost_write_open_memory"
+external write_open_memory_c: archive -> write_buffer_ptr -> written_ptr -> status = "ost_write_open_memory"
 external write_header: archive -> entry -> status = "ost_write_header"
 external write_set_format_7zip: archive -> status = "ost_write_set_format_7zip"
 external write_set_format_ar_bsd: archive -> status = "ost_write_set_format_ar_bsd"
@@ -212,7 +202,7 @@ external write_add_filter_none: archive -> status = "ost_write_add_filter_none"
 external write_add_filter_uuencode: archive -> status = "ost_write_add_filter_uuencode"
 external write_add_filter_xz: archive -> status = "ost_write_add_filter_xz"
 external write_data: archive -> string -> int -> int = "ost_write_data"
-external write_close: archive -> status = "ost_write_close"
+external write_close_c: archive -> status = "ost_write_close"
 
 external print_pointer: entry -> unit = "ost_print_pointer"
 
@@ -223,6 +213,28 @@ external written_ptr_read: written_ptr -> int = "ost_written_ptr_read"
 external write_buffer_new: unit -> write_buffer_ptr = "ost_write_buffer_new"
 external write_buffer_read: write_buffer_ptr -> written_ptr -> string = "ost_write_buffer_read"
 external write_buffer_free: write_buffer_ptr -> unit = "ost_write_buffer_free"
+
+let write_close writehandle = match writehandle with
+        | ErrorMonad.Success (archive, buff, written) ->
+                let retval = write_close_c archive in
+                (match retval with
+                        | Ok -> let content = write_buffer_read buff written in
+                                ErrorMonad.Success(content)
+                        | _ -> let errcode = errno archive in
+                                let errstr = error_string archive in
+                                ErrorMonad.Failure(errcode, errstr))
+        | ErrorMonad.Failure (code, str) -> ErrorMonad.Failure (code, str)
+
+let write_open_memory writehandle =
+        match writehandle with
+        | ErrorMonad.Success (archive, buff, written) ->
+                let retval = write_open_memory_c archive buff written in
+                (match retval with
+                | Ok -> ErrorMonad.Success (archive, buff, written)
+                | _ -> let errcode = errno archive in
+                        let errstr = error_string archive in
+                        ErrorMonad.Failure(errcode, errstr))
+        | err -> err
 
 let archive_status_error_wrapper fn archive =
         let retval = fn archive in
@@ -314,7 +326,11 @@ let extract_all = function
 
 let write_entire_data archive content =
     let length = String.length content in
-    ignore (write_data archive content length)
+    let written = write_data archive content length in
+    if length = written then
+            ErrorMonad.Success (archive)
+    else
+            ErrorMonad.Failure (0, "Data written does not match")
 
 (* inspired by Batteries' Option module, function may *)
 let may f = function
@@ -337,14 +353,26 @@ let set_metadata entry meta =
     may (entry_set_uname entry) meta.uname;
     may (entry_set_gname entry) meta.gname
 
-let write_file archive file =
-    let entry = entry_new () in
-    match file with
-        | File (content, metadata) ->
-                set_metadata entry metadata;
-                ignore (write_header archive entry);
-                write_entire_data archive content
-        | Directory metadata -> ()
+let write_header_wrapper archive entry =
+    let retval = write_header archive entry in
+    match retval with
+    | Ok -> ErrorMonad.Success (archive)
+    | _ -> let errcode = errno archive in
+        let errstr = error_string archive in
+        ErrorMonad.Failure (errcode, errstr)
+
+let write_entry handle file = match handle with
+        | ErrorMonad.Success (archive, buff, written) -> let entry = entry_new () in
+                (match file with
+                | File (content, metadata) ->
+                        set_metadata entry metadata;
+                        let header_written = write_header_wrapper archive entry in
+                        let data_written = ErrorMonad.bind header_written (fun arc -> write_entire_data arc content) in
+                        (match data_written with
+                                | ErrorMonad.Success (arc) -> ErrorMonad.Success(arc, buff, written)
+                                | ErrorMonad.Failure (code, str) -> ErrorMonad.Failure(code, str))
+                | Directory metadata -> ErrorMonad.Failure (0, "Directory failed"))
+        | ErrorMonad.Failure (code, str) -> ErrorMonad.Failure(code, str)
 
 let apply_read_filter fmt archive = match fmt with
         | AllFilterReader -> archive_status_error_wrapper read_support_filter_all archive
@@ -353,36 +381,36 @@ let apply_read_format (fmt : read_format) (archive : archive) : archive ErrorMon
         | AllFormatReader -> archive_status_error_wrapper read_support_format_all archive
         | RawFormatReader -> archive_status_error_wrapper read_support_format_raw archive
 
-let apply_write_filter archive = function
-        | Base64FilterWriter -> write_add_filter_b64encode archive
-        | BZip2FilterWriter -> write_add_filter_bzip2 archive
-        | CompressFilterWriter -> write_add_filter_compress archive
-        | GRZipFilterWriter -> write_add_filter_grzip archive
-        | GZipFilterWriter -> write_add_filter_gzip archive
-        | LRZipFilterWriter -> write_add_filter_lrzip archive
-        | LZipFilterWriter -> write_add_filter_lzip archive
-        | LZMAFilterWriter -> write_add_filter_lzma archive
-        | LZOPFilterWriter -> write_add_filter_lzop archive
-        | NoneFilterWriter -> write_add_filter_none archive
-        | UUEncodeFilterWriter -> write_add_filter_uuencode archive
-        | XZFilterWriter -> write_add_filter_xz archive
+let apply_write_filter fmt archive = match fmt with
+        | Base64FilterWriter -> archive_status_error_wrapper write_add_filter_b64encode archive
+        | BZip2FilterWriter -> archive_status_error_wrapper write_add_filter_bzip2 archive
+        | CompressFilterWriter -> archive_status_error_wrapper write_add_filter_compress archive
+        | GRZipFilterWriter -> archive_status_error_wrapper write_add_filter_grzip archive
+        | GZipFilterWriter -> archive_status_error_wrapper write_add_filter_gzip archive
+        | LRZipFilterWriter -> archive_status_error_wrapper write_add_filter_lrzip archive
+        | LZipFilterWriter -> archive_status_error_wrapper write_add_filter_lzip archive
+        | LZMAFilterWriter -> archive_status_error_wrapper write_add_filter_lzma archive
+        | LZOPFilterWriter -> archive_status_error_wrapper write_add_filter_lzop archive
+        | NoneFilterWriter -> archive_status_error_wrapper write_add_filter_none archive
+        | UUEncodeFilterWriter -> archive_status_error_wrapper write_add_filter_uuencode archive
+        | XZFilterWriter -> archive_status_error_wrapper write_add_filter_xz archive
 
-let apply_write_format archive = function
-        | SevenZipFormatWriter -> write_set_format_7zip archive
-        | ARBSDFormatWriter -> write_set_format_ar_bsd archive
-        | ARSVR4FormatWriter -> write_set_format_ar_svr4 archive
-        | CPIOFormatWriter -> write_set_format_cpio archive
-        | CPIONEWCFormatWriter -> write_set_format_cpio_newc archive
-        | GnuTARFormatWriter -> write_set_format_gnutar archive
-        | ISO9660FormatWriter -> write_set_format_iso9660 archive
-        | MtreeFormatWriter -> write_set_format_mtree archive
-        | PAXFormatWriter -> write_set_format_pax archive
-        | RawFormatWriter -> write_set_format_raw archive
-        | SharFormatWriter -> write_set_format_shar archive
-        | USTARFormatWriter -> write_set_format_ustar archive
-        | V7TARFormatWriter -> write_set_format_v7tar archive
-        | XARFormatWriter -> write_set_format_xar archive
-        | ZipFormatWriter -> write_set_format_zip archive
+let apply_write_format fmt archive = match fmt with
+        | SevenZipFormatWriter -> archive_status_error_wrapper write_set_format_7zip archive
+        | ARBSDFormatWriter -> archive_status_error_wrapper write_set_format_ar_bsd archive
+        | ARSVR4FormatWriter -> archive_status_error_wrapper write_set_format_ar_svr4 archive
+        | CPIOFormatWriter -> archive_status_error_wrapper write_set_format_cpio archive
+        | CPIONEWCFormatWriter -> archive_status_error_wrapper write_set_format_cpio_newc archive
+        | GnuTARFormatWriter -> archive_status_error_wrapper write_set_format_gnutar archive
+        | ISO9660FormatWriter -> archive_status_error_wrapper write_set_format_iso9660 archive
+        | MtreeFormatWriter -> archive_status_error_wrapper write_set_format_mtree archive
+        | PAXFormatWriter -> archive_status_error_wrapper write_set_format_pax archive
+        | RawFormatWriter -> archive_status_error_wrapper write_set_format_raw archive
+        | SharFormatWriter -> archive_status_error_wrapper write_set_format_shar archive
+        | USTARFormatWriter -> archive_status_error_wrapper write_set_format_ustar archive
+        | V7TARFormatWriter -> archive_status_error_wrapper write_set_format_v7tar archive
+        | XARFormatWriter -> archive_status_error_wrapper write_set_format_xar archive
+        | ZipFormatWriter -> archive_status_error_wrapper write_set_format_zip archive
 
 let read_new_configured formats filters =
         let handle = read_new () in
@@ -397,12 +425,13 @@ let read_new_configured formats filters =
 
 let write_new_configured format filters =
         let handle = write_new () in
-        let format_status = apply_write_format handle format in
-        let filter_status = List.map (apply_write_filter handle) filters in
-        (* TODO: check return codes for != Ok *)
-        ignore format_status;
-        ignore filter_status;
-        (* TODO: return configured_write_archive type *)
-        handle
-
+        let buffer = write_buffer_new () in
+        let written = written_ptr_new () in
+        let formatted_handle = apply_write_format format handle in
+        let filtered_handle =
+                let folder m flt = ErrorMonad.bind m (apply_write_filter flt) in
+                List.fold_left folder formatted_handle filters in
+        match filtered_handle with
+                | ErrorMonad.Success (archive) -> ErrorMonad.Success (archive, buffer, written)
+                | ErrorMonad.Failure (code,str) -> ErrorMonad.Failure (code, str)
 end
