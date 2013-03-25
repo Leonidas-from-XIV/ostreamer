@@ -10,7 +10,7 @@ Library "ost"
   Path:       src/
   Modules:    Archive
   CSources:   Archive_stubs.c, ost_write_open_memory.c, ost_write_open_memory.h
-  CCLib:      -larchive
+  CCLib:      -L/home/marek/libarchive/tmp/libarchive -larchive
   BuildTools: ocamlbuild
 
 Executable "ost-test"

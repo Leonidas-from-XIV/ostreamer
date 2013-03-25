@@ -214,35 +214,32 @@ external write_buffer_new: unit -> write_buffer_ptr = "ost_write_buffer_new"
 external write_buffer_read: write_buffer_ptr -> written_ptr -> string = "ost_write_buffer_read"
 external write_buffer_free: write_buffer_ptr -> unit = "ost_write_buffer_free"
 
-let write_close writehandle = match writehandle with
-        | ErrorMonad.Success (archive, buff, written) ->
+let write_close writehandle =
+        ErrorMonad.bind writehandle (fun (archive, buff, written) ->
                 let retval = write_close_c archive in
-                (match retval with
+                match retval with
                         | Ok -> let content = write_buffer_read buff written in
                                 ErrorMonad.Success(content)
                         | _ -> let errcode = errno archive in
                                 let errstr = error_string archive in
                                 ErrorMonad.Failure(errcode, errstr))
-        | ErrorMonad.Failure (code, str) -> ErrorMonad.Failure (code, str)
 
 let write_open_memory writehandle =
-        match writehandle with
-        | ErrorMonad.Success (archive, buff, written) ->
+        ErrorMonad.bind writehandle (fun (archive, buff, written) ->
                 let retval = write_open_memory_c archive buff written in
-                (match retval with
-                | Ok -> ErrorMonad.Success (archive, buff, written)
-                | _ -> let errcode = errno archive in
-                        let errstr = error_string archive in
-                        ErrorMonad.Failure(errcode, errstr))
-        | err -> err
+                match retval with
+                        | Ok -> ErrorMonad.Success (archive, buff, written)
+                        | _ -> let errcode = errno archive in
+                                let errstr = error_string archive in
+                                ErrorMonad.Failure(errcode, errstr))
 
 let archive_status_error_wrapper fn archive =
         let retval = fn archive in
         match retval with
-        | Ok -> ErrorMonad.Success(archive)
-        | _ -> let errcode = errno archive in
-                let errstr = error_string archive in
-                ErrorMonad.Failure(errcode, errstr)
+                | Ok -> ErrorMonad.Success(archive)
+                | _ -> let errcode = errno archive in
+                        let errstr = error_string archive in
+                        ErrorMonad.Failure(errcode, errstr)
 
 let read_entire_data archive =
         let c_buffer_size = 1024 in
@@ -272,24 +269,15 @@ let read_meta_data entry =
             uname = entry_uname entry;
         }
 
-let feed_data_old handle data =
-        let len = String.length data in
-        let ret = read_open_memory handle data len in
-        match ret with
-        | Ok -> handle
-        | _ -> handle
-        (* TODO: proper error handling *)
-
 let feed_data handlemonad data =
-        let feed_inner handle =
+        ErrorMonad.bind handlemonad (fun handle ->
                 let len = String.length data in
                 let retval = read_open_memory handle data len in
                 match retval with
-                | Ok -> ErrorMonad.Success(handle)
-                | _ -> let errcode = errno handle in
-                        let errstr = error_string handle in
-                        ErrorMonad.Failure(errcode, errstr) in
-        ErrorMonad.bind handlemonad feed_inner
+                        | Ok -> ErrorMonad.Success(handle)
+                        | _ -> let errcode = errno handle in
+                                let errstr = error_string handle in
+                                ErrorMonad.Failure(errcode, errstr))
 
 let extract_all = function
         | ErrorMonad.Success (archive) -> (let entry = entry_new () in
@@ -356,10 +344,10 @@ let set_metadata entry meta =
 let write_header_wrapper archive entry =
     let retval = write_header archive entry in
     match retval with
-    | Ok -> ErrorMonad.Success (archive)
-    | _ -> let errcode = errno archive in
-        let errstr = error_string archive in
-        ErrorMonad.Failure (errcode, errstr)
+            | Ok -> ErrorMonad.Success (archive)
+            | _ -> let errcode = errno archive in
+                let errstr = error_string archive in
+                ErrorMonad.Failure (errcode, errstr)
 
 let write_entry handle file = match handle with
         | ErrorMonad.Success (archive, buff, written) -> let entry = entry_new () in
