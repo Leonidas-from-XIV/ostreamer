@@ -28,7 +28,7 @@ let test_decompress_raw_single_file _ =
      | _ -> assert_failure "Did not get a single file")
   | ErrorMonad.Failure (code, str) -> assert_failure "Decompression failed"
 
-let test_nocompress_simple_file _ =
+let test_nocompress_single_file _ =
   let handle = Archive.write_new_configured
       Archive.RawFormatWriter [Archive.NoneFilterWriter] in
   let openhandle = Archive.write_open_memory handle in
@@ -52,11 +52,46 @@ let test_nocompress_simple_file _ =
   | ErrorMonad.Success (res) -> equ res raw_file
   | ErrorMonad.Failure (code, str) -> assert_failure "Compression failed"
 
+let test_compress_uncompress_single_file _ =
+  let handle = Archive.write_new_configured
+    Archive.RawFormatWriter [Archive.GZipFilterWriter] in
+  let openhandle = Archive.write_open_memory handle in
+  let meta = {
+    Archive.pathname = "foo";
+    filetype = Unix.S_REG;
+    atime = None;
+    birthtime = None;
+    ctime = None;
+    mtime = None;
+    gid = 1;
+    gname = None;
+    size = None;
+    uid = 1;
+    uname = None;
+  } in
+  let entry = Archive.File(raw_file, meta) in
+  let written = Archive.write_entry openhandle entry in
+  let res = Archive.write_close written in
+  match res with
+  | ErrorMonad.Success (res) ->
+      let readhandle = Archive.read_new_configured
+        [Archive.RawFormatReader] [Archive.AllFilterReader] in
+      let populated = Archive.feed_data readhandle res in
+      let contents = Archive.extract_all populated in
+      (match contents with
+      | ErrorMonad.Success (xs) -> let first = List.hd xs in
+          (match first with
+          | Archive.File (content, meta) -> assert_equal content raw_file
+          | _ -> assert_failure "Did not get a file")
+      | ErrorMonad.Failure (code, str) -> assert_failure "Decompression failed")
+  | ErrorMonad.Failure (code, str) -> assert_failure "Compression failed"
+
 let suite = "Simple tests" >::: [
-    "test_version_getting" >:: test_version_getting;
-    "test_decompress_raw_single_file" >:: test_decompress_raw_single_file;
-    "test_nocompress_simple_file" >:: test_nocompress_simple_file;
-  ]
+  "test_version_getting" >:: test_version_getting;
+  "test_decompress_raw_single_file" >:: test_decompress_raw_single_file;
+  "test_nocompress_single_file" >:: test_nocompress_single_file;
+  "test_compress_uncompress_single_file" >:: test_compress_uncompress_single_file;
+]
 
 let _ =
   run_test_tt_main suite
