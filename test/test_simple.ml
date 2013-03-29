@@ -1,6 +1,4 @@
 open OUnit
-(* TODO: eliminate this prefix *)
-open Archive
 
 let equ = assert_equal
 
@@ -32,19 +30,7 @@ let test_nocompress_single_file _ =
   let handle = Archive.write_new_configured
       Archive.RawFormatWriter [Archive.NoneFilterWriter] in
   let openhandle = Archive.write_open_memory handle in
-  let meta = {
-    Archive.pathname = "foo";
-    filetype = Unix.S_REG;
-    atime = None;
-    birthtime = None;
-    ctime = None;
-    mtime = None;
-    gid = 1;
-    gname = None;
-    size = None;
-    uid = 1;
-    uname = None;
-  } in
+  let meta = Archive.generate_metadata "foo" in
   let entry = Archive.File(raw_file, meta) in
   let written = Archive.write_entry openhandle entry in
   let res = Archive.write_close written in

@@ -8,7 +8,7 @@ Plugins:     META (0.3), DevFiles (0.3)
 
 Library "ost"
   Path:       src/
-  Modules:    Archive
+  Modules:    ErrorMonad, Archive
   CSources:   Archive_stubs.c, ost_write_open_memory.c, ost_write_open_memory.h
   CCLib:      -L/home/marek/libarchive/tmp/libarchive -larchive
   BuildTools: ocamlbuild
