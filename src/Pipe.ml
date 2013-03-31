@@ -1,5 +1,17 @@
-type process = Data of string | Archive of handle | Decompress | Decompressed of string list | Compress
+let construct str =
+  ErrorMonad.Success(str)
 
-let (|>) a b = match (a, b) with
-  | (Data (s), Decompress) -> "foo"
-  | _ -> "bar"
+let decompress str =
+  let handle = Archive.read_new_configured
+      [Archive.AllFormatReader; Archive.RawFormatReader]
+      [Archive.AllFilterReader] in
+  let populated = Archive.feed_data handle str in
+  Archive.extract_all populated
+
+(*
+ * construct "raw" |> decompress |> compress |> writeout
+ *)
+
+(* Maybe use >>= directly? *)
+let (|>) m f =
+  ErrorMonad.bind m f
