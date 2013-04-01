@@ -208,12 +208,12 @@ CAMLprim value ost_write_data(value a, value b, value s)
     archive* handle = Archive_val(a);
     char* buffer = String_val(b);
     size_t size = Int_val(s);
-    printf("Writing size: %zu\n", size);
-    //fwrite(buffer, 1, size, stderr);
+    /* printf("Writing size: %zu\n", size); */
+    /* fwrite(buffer, 1, size, stderr); */
 
     int written = archive_write_data(*handle, buffer, size);
-    printf("Retval write_data = %d\n", written);
-    printf("Error: %s\n", archive_error_string(*handle));
+    /* printf("Retval write_data = %d\n", written); */
+    /* printf("Error: %s\n", archive_error_string(*handle)); */
     return Val_int(written);
 }
 
