@@ -1,5 +1,4 @@
 open OUnit
-open Pipe
 
 let equ = assert_equal
 
@@ -74,7 +73,8 @@ let test_compress_uncompress_single_file _ =
   | ErrorMonad.Failure (code, str) -> assert_failure "Compression failed"
 
 let test_pipe_decompress _ =
-  match construct raw_gz_file |> decompress with
+  let (|>) = Pipe.(|>) in
+  match Pipe.construct raw_gz_file |> Pipe.decompress with
   | ErrorMonad.Success (entries) -> let first = List.hd entries in
     (match first with
     | Archive.File (content, meta) -> assert_equal content raw_file
