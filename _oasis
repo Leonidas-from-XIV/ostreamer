@@ -18,7 +18,7 @@ Executable "ost-test"
   BuildTools:     ocamlbuild
   CompiledObject: best
   BuildDepends:   ost, oUnit
-  MainIs:         test_simple.ml
+  MainIs:         unittest.ml
 
 #Executable "ost-launch"
 #  Path:           src
