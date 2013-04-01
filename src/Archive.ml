@@ -74,7 +74,9 @@ external read_support_format_all: archive -> status = "ost_read_support_format_a
 external read_support_format_raw: archive -> status = "ost_read_support_format_raw"
 external read_open_memory: archive -> string -> int -> status = "ost_read_open_memory"
 external read_next_header: archive -> entry -> status = "ost_read_next_header"
+(* TODO: determine whether to use int or int64 *)
 external read_data: archive -> string ref -> int -> int = "ost_read_data"
+(* TODO: remove binding *)
 external read_data_block: archive -> string ref -> int ref -> int ref -> int = "ost_read_data_block"
 
 external entry_new: unit -> entry = "ost_entry_new"
