@@ -49,10 +49,10 @@ let test_compress_uncompress_single_file _ =
     birthtime = None;
     ctime = None;
     mtime = None;
-    gid = 1;
+    gid = Int64.one;
     gname = None;
     size = None;
-    uid = 1;
+    uid = Int64.one;
     uname = None;
   } in
   let entry = Archive.File(raw_file, meta) in

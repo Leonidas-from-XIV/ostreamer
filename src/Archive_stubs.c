@@ -496,8 +496,7 @@ CAMLprim value ost_entry_size(value e)
     __LA_INT64_T size;
     if (archive_entry_size_is_set(*ent)) {
         size = archive_entry_size(*ent);
-        /* TODO: wrap in better thing than Int_val, 64 bit */
-        return Val_some(Val_int(size));
+        return Val_some(caml_copy_int64(size));
     }
     return Val_none;
 }
@@ -554,8 +553,7 @@ CAMLprim value ost_entry_set_pathname(value e, value p)
 CAMLprim value ost_entry_set_size(value e, value s)
 {
     entry* ent = Entry_val(e);
-    /* TODO better integer type or whatnot */
-    __LA_INT64_T size = Int_val(s);
+    __LA_INT64_T size = Int64_val(s);
 
     archive_entry_set_size(*ent, size);
     return Val_unit;
@@ -596,8 +594,7 @@ CAMLprim value ost_entry_set_birthtime(value e, value t)
 static CAMLprim value ost_entry_set_usergroup(value e, value u, void (*set)(struct archive_entry*, __LA_INT64_T))
 {
     entry* ent = Entry_val(e);
-    /* TODO int64 */
-    __LA_INT64_T val = Int_val(u);
+    __LA_INT64_T val = Int64_val(u);
     set(*ent, val);
     return Val_unit;
 }
@@ -635,8 +632,7 @@ static CAMLprim value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(stru
 {
     entry* ent = Entry_val(e);
     __LA_INT64_T val = retrieve(*ent);
-    /* TODO int64 */
-    return Val_int(val);
+    return caml_copy_int64(val);
 }
 
 CAMLprim value ost_entry_uid(value e)

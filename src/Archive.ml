@@ -12,10 +12,10 @@ type entry_metadata =
     birthtime: float option;
     ctime: float option;
     mtime: float option;
-    gid: int;
+    gid: int64;
     gname: string option;
-    size: int option;
-    uid: int;
+    size: int64 option;
+    uid: int64;
     uname: string option;
   }
 
@@ -80,23 +80,23 @@ external read_data_block: archive -> string ref -> int ref -> int ref -> int = "
 external entry_new: unit -> entry = "ost_entry_new"
 external entry_set_filetype: entry -> Unix.file_kind -> unit = "ost_entry_set_filetype"
 external entry_set_pathname: entry -> string -> unit = "ost_entry_set_pathname"
-external entry_set_size: entry -> int -> unit = "ost_entry_set_size"
+external entry_set_size: entry -> int64 -> unit = "ost_entry_set_size"
 external entry_set_mtime: entry -> float -> unit = "ost_entry_set_mtime"
 external entry_set_atime: entry -> float -> unit = "ost_entry_set_atime"
 external entry_set_ctime: entry -> float -> unit = "ost_entry_set_ctime"
 external entry_set_birthtime: entry -> float -> unit = "ost_entry_set_birthtime"
-external entry_set_uid: entry -> int -> unit = "ost_entry_set_uid"
-external entry_set_gid: entry -> int -> unit = "ost_entry_set_gid"
+external entry_set_uid: entry -> int64 -> unit = "ost_entry_set_uid"
+external entry_set_gid: entry -> int64 -> unit = "ost_entry_set_gid"
 external entry_set_uname: entry -> string -> unit = "ost_entry_set_uname"
 external entry_set_gname: entry -> string -> unit = "ost_entry_set_gname"
 external entry_pathname: entry -> string = "ost_entry_pathname"
-external entry_size: entry -> int option = "ost_entry_size"
+external entry_size: entry -> int64 option = "ost_entry_size"
 external entry_mtime: entry -> float option = "ost_entry_mtime"
 external entry_atime: entry -> float option = "ost_entry_atime"
 external entry_ctime: entry -> float option = "ost_entry_ctime"
 external entry_birthtime: entry -> float option = "ost_entry_birthtime"
-external entry_uid: entry -> int = "ost_entry_uid"
-external entry_gid: entry -> int = "ost_entry_gid"
+external entry_uid: entry -> int64 = "ost_entry_uid"
+external entry_gid: entry -> int64 = "ost_entry_gid"
 external entry_uname: entry -> string option = "ost_entry_uname"
 external entry_gname: entry -> string option = "ost_entry_gname"
 external entry_filetype: entry -> Unix.file_kind = "ost_entry_filetype"
@@ -152,10 +152,10 @@ let generate_metadata ?(filetype=Unix.S_REG) pathname =
   birthtime = None;
   ctime = None;
   mtime = None;
-  gid = 1;
+  gid = Int64.one;
   gname = None;
   size = None;
-  uid = 1;
+  uid = Int64.one;
   uname = None;
 }
 

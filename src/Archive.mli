@@ -39,10 +39,10 @@ type entry_metadata =
     birthtime: float option;
     ctime: float option;
     mtime: float option;
-    gid: int;
+    gid: int64;
     gname: string option;
-    size: int option;
-    uid: int;
+    size: int64 option;
+    uid: int64;
     uname: string option;
   }
 type ost_entry = File of string * entry_metadata | Directory of entry_metadata
