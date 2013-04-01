@@ -1,4 +1,5 @@
 open OUnit
+open Pipe
 
 let equ = assert_equal
 
@@ -72,11 +73,20 @@ let test_compress_uncompress_single_file _ =
       | ErrorMonad.Failure (code, str) -> assert_failure "Decompression failed")
   | ErrorMonad.Failure (code, str) -> assert_failure "Compression failed"
 
+let test_pipe_decompress _ =
+  match construct raw_gz_file |> decompress with
+  | ErrorMonad.Success (entries) -> let first = List.hd entries in
+    (match first with
+    | Archive.File (content, meta) -> assert_equal content raw_file
+    | _ -> assert_failure "Did not decompress to a file")
+  | ErrorMonad.Failure (code, str) -> assert_failure "Decompression failed"
+
 let suite = "Simple tests" >::: [
   "test_version_getting" >:: test_version_getting;
   "test_decompress_raw_single_file" >:: test_decompress_raw_single_file;
   "test_nocompress_single_file" >:: test_nocompress_single_file;
   "test_compress_uncompress_single_file" >:: test_compress_uncompress_single_file;
+  "test_pipe_decompress" >:: test_pipe_decompress;
 ]
 
 let _ =
