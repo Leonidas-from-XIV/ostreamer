@@ -13,5 +13,4 @@ let decompress str =
  *)
 
 (* Maybe use >>= directly? *)
-let (|>) m f =
-  ErrorMonad.bind m f
+let (|>) = ErrorMonad.bind
