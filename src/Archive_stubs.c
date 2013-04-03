@@ -129,9 +129,13 @@ CAMLprim value ost_version_string(value unit)
 
 CAMLprim value ost_read_new(value unit)
 {
+    /* create a CAML value instance */
     CAMLlocal1(ml_value);
+    /* allocate a custom block */
     ml_value = caml_alloc_custom(&archive_ops, sizeof(archive), 0, 1);
-    archive* ptr = Data_custom_val(ml_value);
+    /* get C value from custom block */
+    archive* ptr = Archive_val(ml_value);
+    /* get a new libarchive 'archive' instance and store it in the block */
     *ptr = archive_read_new();
     return ml_value;
 }
