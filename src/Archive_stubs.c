@@ -173,7 +173,7 @@ CAMLprim value ost_write_new(value unit)
 {
     CAMLlocal1(ml_value);
     ml_value = caml_alloc_custom(&archive_ops, sizeof(archive), 0, 1);
-    archive* ptr = Data_custom_val(ml_value);
+    archive* ptr = Archive_val(ml_value);
     *ptr = archive_write_new();
     return ml_value;
 }
