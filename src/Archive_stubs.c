@@ -1,22 +1,44 @@
+/* OCaml C FFI stubs that convert from OCaml values to C values,
+ * call C functions and return results as OCaml values back
+ * to the calling code
+ */
+
+/* C standard headers */
+#include <string.h>
+
+/* OCaml headers */
 #include <caml/mlvalues.h>
 #include <caml/alloc.h>
 #include <caml/memory.h>
 #include <caml/custom.h>
-#include <string.h>
+
+/* libarchive  headers */
 #include <archive.h>
 #include <archive_entry.h>
 
+/* local headers */
 #include "ost_write_open_memory.h"
 
+/* libarchive does not typedef the archive types, but we do.
+ * The extent of typedef-ing (only typedef the struct? add a pointer to it?)
+ * was inspired from ocaml-archive and works rather well
+ */
 typedef struct archive* archive;
 typedef struct archive_entry* entry;
+
+/* accessor macros that convert OCaml values into the C types that libarchive
+ * exports
+ */
 #define Archive_val(v) ((struct archive**)(Data_custom_val(v)))
 #define Entry_val(v) ((struct archive_entry**)(Data_custom_val(v)))
+/* an OCaml ref is the first entry of a field. Can also be used as lvalue */
 #define Ref_val(v) (Field((v),0))
 
+/* prototypes, required for the callbacks */
 void ost_read_free(value a);
 void ost_entry_free(value e);
 
+/* custom blocks for the two types that libarchive uses: archive and entry */
 static struct custom_operations archive_ops = {
     identifier: "archive",
     finalize: ost_read_free,
@@ -35,6 +57,13 @@ static struct custom_operations entry_ops = {
     deserialize: custom_deserialize_default
 };
 
+/* these values mirror the values for the ost_status type in OCaml.
+ * the order has to be exactly the same as in the OCaml code.
+ * these values also mirror the return values of libarchive status error
+ * codes: ARCHIVE_OK, ARCHIVE_EOF, but only by name, not value.
+ * We consider the values in libarchive implementation-dependent so we just
+ * depend on the symbolic names. See map_errorcode for a translation function.
+ */
 typedef enum _ost_status {
     OST_OK,
     OST_EOF,
@@ -44,6 +73,9 @@ typedef enum _ost_status {
     OST_FATAL
 } ost_status;
 
+/* These values represent the Unix.file_kind type and map to the exact same
+ * values that OCaml uses to represent Unix.file_kind. Order matters.
+ */
 /* TODO: check if this is accessible directly from a header file */
 typedef enum _ost_file_kind {
     S_REG,
@@ -55,9 +87,16 @@ typedef enum _ost_file_kind {
     S_SOCK
 } ost_file_kind;
 
+/* Maps the libarchive ARCHIVE_* error code to an OST_* error code that can be
+ * represented by the ost_status type in OCaml.
+ * Every C function that returns a status code from libarchive MUST call this,
+ * to translate the libarchive error code into an ost_status error code.
+ *
+ * This function is not exported so no namespece pollution occurs.
+ */
 static int map_errorcode(int retval)
 {
-    /*printf("Map errorcode: %d\n", retval);*/
+    /* This function is not fancy at all */
     switch (retval)
     {
         case ARCHIVE_OK:
