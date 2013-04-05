@@ -36,7 +36,7 @@ typedef struct archive_entry* entry;
 
 /* prototypes, required for the callbacks */
 void ost_read_free(value a);
-void ost_entry_free(value e);
+static void ost_entry_free(value e);
 
 /* custom blocks for the two types that libarchive uses: archive and entry */
 static struct custom_operations archive_ops = {
@@ -154,11 +154,13 @@ CAMLprim value ost_read_new(value unit)
  * so it doesn't return an unit type but void, since it is called by the
  * custom block handler
  */
-void ost_read_free(value a)
+static void ost_read_free(value a)
 {
     archive* handle = Archive_val(a);
     archive_read_free(*handle);
 }
+
+/* TODO: ost_write_free? */
 
 /* Function for setting setting filters/formats. It is not exposed directly to
  * the OCaml interface but used internally for callbacks by other functions
@@ -547,6 +549,7 @@ CAMLprim value ost_write_set_format_zip(value a)
     return ost_archive_configure(a, archive_write_set_format_zip);
 }
 
+/* Filters for write handles. Multiple filters can be added, I think. */
 CAMLprim value ost_write_add_filter_b64encode(value a)
 {
     return ost_archive_configure(a, archive_write_add_filter_b64encode);
@@ -616,27 +619,35 @@ void dump_buffer(char* buffer, size_t len)
     }
 }
 
+/* Opens a read handle: basically set the buffer from which to read data */
 CAMLprim value ost_read_open_memory(value a, value buff, value size)
 {
     archive* handle = Archive_val(a);
     char *buffer = String_val(buff);
+    /* TODO: int64? */
     size_t len = Int_val(size);
     int retval = archive_read_open_memory(*handle, buffer, len);
     return Val_int(map_errorcode(retval));
 }
 
+/* Creates a new entry element out of nowhere. */
 CAMLprim value ost_entry_new(value unit)
 {
     CAMLlocal1(ml_value);
     entry ent = archive_entry_new();
     ml_value = caml_alloc_custom(&entry_ops, sizeof(entry), 0, 1);
+    /* get C value out of OCaml entry type */
     entry* ptr = Entry_val(ml_value);
+    /* and set its contents to the C entry type */
     *ptr = ent;
 
     return ml_value;
 }
 
-void ost_entry_free(value e)
+/* frees a handle. This needs to be called on all handles created by
+ * entry_new, but not on ones that libarchive returns
+ */
+static void ost_entry_free(value e)
 {
     entry* ent = Entry_val(e);
     archive_entry_free(*ent);
