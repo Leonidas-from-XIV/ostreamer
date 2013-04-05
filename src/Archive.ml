@@ -29,8 +29,35 @@ type status =
   | Failed
   | Fatal
 
-type read_filter = AllFilterReader
-type read_format = AllFormatReader | RawFormatReader
+type read_filter =
+  | AllFilterReader
+  | BZip2FilterReader
+  | CompressFilterReader
+  | GRZipFilterReader
+  | GZipFilterReader
+  | LRZipFilterReader
+  | LZipFilterReader
+  | LZMAFilterReader
+  | LZOPFilterReader
+  | NoneFilterReader
+  | RPMFilterReader
+  | UUFilterReader
+  | XZFilterReader
+type read_format =
+  | SevenZipFormatReader
+  | AllFormatReader
+  | ARFormatReader
+  | CABFormatReader
+  | CPIOFormatReader
+  | GnuTARFormatReader
+  | ISO9660FormatReader
+  | LHAFormatReader
+  | MtreeFormatReader
+  | RARFormatReader
+  | RawFormatReader
+  | TARFormatReader
+  | XARFormatReader
+  | ZipFormatReader
 
 type write_filter =
   | Base64FilterWriter
@@ -43,7 +70,7 @@ type write_filter =
   | LZMAFilterWriter
   | LZOPFilterWriter
   | NoneFilterWriter
-  | UUEncodeFilterWriter
+  | UUFilterWriter
   | XZFilterWriter
 type write_format =
   | SevenZipFormatWriter
@@ -70,8 +97,32 @@ external error_string: archive -> string = "ost_error_string"
 
 external read_new: unit -> archive = "ost_read_new"
 external read_support_filter_all: archive -> status = "ost_read_support_filter_all"
+external read_support_filter_bzip2: archive -> status = "ost_read_support_filter_bzip2"
+external read_support_filter_compress: archive -> status = "ost_read_support_filter_compress"
+external read_support_filter_grzip: archive -> status = "ost_read_support_filter_grzip"
+external read_support_filter_gzip: archive -> status = "ost_read_support_filter_gzip"
+external read_support_filter_lrzip: archive -> status = "ost_read_support_filter_lrzip"
+external read_support_filter_lzip: archive -> status = "ost_read_support_filter_lzip"
+external read_support_filter_lzma: archive -> status = "ost_read_support_filter_lzma"
+external read_support_filter_lzop: archive -> status = "ost_read_support_filter_lzop"
+external read_support_filter_none: archive -> status = "ost_read_support_filter_none"
+external read_support_filter_rpm: archive -> status = "ost_read_support_filter_rpm"
+external read_support_filter_uu: archive -> status = "ost_read_support_filter_uu"
+external read_support_filter_xz: archive -> status = "ost_read_support_filter_xz"
+external read_support_format_7zip: archive -> status = "ost_read_support_format_7zip"
 external read_support_format_all: archive -> status = "ost_read_support_format_all"
+external read_support_format_ar: archive -> status = "ost_read_support_format_ar"
+external read_support_format_cab: archive -> status = "ost_read_support_format_cab"
+external read_support_format_cpio: archive -> status = "ost_read_support_format_cpio"
+external read_support_format_gnutar: archive -> status = "ost_read_support_format_gnutar"
+external read_support_format_iso9660: archive -> status = "ost_read_support_format_iso9660"
+external read_support_format_lha: archive -> status = "ost_read_support_format_lha"
+external read_support_format_mtree: archive -> status = "ost_read_support_format_mtree"
+external read_support_format_rar: archive -> status = "ost_read_support_format_rar"
 external read_support_format_raw: archive -> status = "ost_read_support_format_raw"
+external read_support_format_tar: archive -> status = "ost_read_support_format_tar"
+external read_support_format_xar: archive -> status = "ost_read_support_format_xar"
+external read_support_format_zip: archive -> status = "ost_read_support_format_zip"
 external read_open_memory: archive -> string -> int -> status = "ost_read_open_memory"
 external read_next_header: archive -> entry -> status = "ost_read_next_header"
 (* TODO: determine whether to use int or int64 *)
@@ -146,6 +197,7 @@ external write_buffer_new: unit -> write_buffer_ptr = "ost_write_buffer_new"
 external write_buffer_read: write_buffer_ptr -> written_ptr -> string = "ost_write_buffer_read"
 external write_buffer_free: write_buffer_ptr -> unit = "ost_write_buffer_free"
 
+(* TODO: add remaining arguments *)
 let generate_metadata ?(filetype=Unix.S_REG) pathname =
 {
   pathname = pathname;
@@ -311,10 +363,34 @@ let write_entry handle file = match handle with
 
 let apply_read_filter fmt archive = match fmt with
   | AllFilterReader -> archive_status_error_wrapper read_support_filter_all archive
+  | BZip2FilterReader -> archive_status_error_wrapper read_support_filter_bzip2 archive
+  | CompressFilterReader -> archive_status_error_wrapper read_support_filter_compress archive
+  | GRZipFilterReader -> archive_status_error_wrapper read_support_filter_grzip archive
+  | GZipFilterReader -> archive_status_error_wrapper read_support_filter_gzip archive
+  | LRZipFilterReader -> archive_status_error_wrapper read_support_filter_lrzip archive
+  | LZipFilterReader -> archive_status_error_wrapper read_support_filter_lzip archive
+  | LZMAFilterReader -> archive_status_error_wrapper read_support_filter_lzma archive
+  | LZOPFilterReader -> archive_status_error_wrapper read_support_filter_lzop archive
+  | NoneFilterReader -> archive_status_error_wrapper read_support_filter_none archive
+  | RPMFilterReader -> archive_status_error_wrapper read_support_filter_rpm archive
+  | UUFilterReader -> archive_status_error_wrapper read_support_filter_uu archive
+  | XZFilterReader -> archive_status_error_wrapper read_support_filter_xz archive
 
 let apply_read_format (fmt : read_format) (archive : archive) : archive ErrorMonad.t = match fmt with
+  | SevenZipFormatReader -> archive_status_error_wrapper read_support_format_7zip archive
   | AllFormatReader -> archive_status_error_wrapper read_support_format_all archive
+  | ARFormatReader -> archive_status_error_wrapper read_support_format_ar archive
+  | CABFormatReader -> archive_status_error_wrapper read_support_format_cab archive
+  | CPIOFormatReader -> archive_status_error_wrapper read_support_format_cpio archive
+  | GnuTARFormatReader -> archive_status_error_wrapper read_support_format_gnutar archive
+  | ISO9660FormatReader -> archive_status_error_wrapper read_support_format_iso9660 archive
+  | LHAFormatReader -> archive_status_error_wrapper read_support_format_lha archive
+  | MtreeFormatReader -> archive_status_error_wrapper read_support_format_mtree archive
+  | RARFormatReader -> archive_status_error_wrapper read_support_format_rar archive
   | RawFormatReader -> archive_status_error_wrapper read_support_format_raw archive
+  | TARFormatReader -> archive_status_error_wrapper read_support_format_tar archive
+  | XARFormatReader -> archive_status_error_wrapper read_support_format_xar archive
+  | ZipFormatReader -> archive_status_error_wrapper read_support_format_zip archive
 
 let apply_write_filter fmt archive = match fmt with
   | Base64FilterWriter -> archive_status_error_wrapper write_add_filter_b64encode archive
@@ -327,7 +403,7 @@ let apply_write_filter fmt archive = match fmt with
   | LZMAFilterWriter -> archive_status_error_wrapper write_add_filter_lzma archive
   | LZOPFilterWriter -> archive_status_error_wrapper write_add_filter_lzop archive
   | NoneFilterWriter -> archive_status_error_wrapper write_add_filter_none archive
-  | UUEncodeFilterWriter -> archive_status_error_wrapper write_add_filter_uuencode archive
+  | UUFilterWriter -> archive_status_error_wrapper write_add_filter_uuencode archive
   | XZFilterWriter -> archive_status_error_wrapper write_add_filter_xz archive
 
 let apply_write_format fmt archive = match fmt with

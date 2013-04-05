@@ -1,7 +1,34 @@
 type 'a r
 type 'a w
-type read_format = AllFormatReader | RawFormatReader
-type read_filter = AllFilterReader
+type read_filter =
+  | AllFilterReader
+  | BZip2FilterReader
+  | CompressFilterReader
+  | GRZipFilterReader
+  | GZipFilterReader
+  | LRZipFilterReader
+  | LZipFilterReader
+  | LZMAFilterReader
+  | LZOPFilterReader
+  | NoneFilterReader
+  | RPMFilterReader
+  | UUFilterReader
+  | XZFilterReader
+type read_format =
+  | SevenZipFormatReader
+  | AllFormatReader
+  | ARFormatReader
+  | CABFormatReader
+  | CPIOFormatReader
+  | GnuTARFormatReader
+  | ISO9660FormatReader
+  | LHAFormatReader
+  | MtreeFormatReader
+  | RARFormatReader
+  | RawFormatReader
+  | TARFormatReader
+  | XARFormatReader
+  | ZipFormatReader
 type write_filter =
   | Base64FilterWriter
   | BZip2FilterWriter
@@ -13,7 +40,7 @@ type write_filter =
   | LZMAFilterWriter
   | LZOPFilterWriter
   | NoneFilterWriter
-  | UUEncodeFilterWriter
+  | UUFilterWriter
   | XZFilterWriter
 type write_format =
   | SevenZipFormatWriter

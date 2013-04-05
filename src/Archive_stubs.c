@@ -180,14 +180,134 @@ CAMLprim value ost_read_support_filter_all(value a)
     return ost_archive_configure(a, archive_read_support_filter_all);
 }
 
+CAMLprim value ost_read_support_filter_bzip2(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_bzip2);
+}
+
+CAMLprim value ost_read_support_filter_compress(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_compress);
+}
+
+CAMLprim value ost_read_support_filter_grzip(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_grzip);
+}
+
+CAMLprim value ost_read_support_filter_gzip(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_gzip);
+}
+
+CAMLprim value ost_read_support_filter_lrzip(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_lrzip);
+}
+
+CAMLprim value ost_read_support_filter_lzip(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_lzip);
+}
+
+CAMLprim value ost_read_support_filter_lzma(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_lzma);
+}
+
+CAMLprim value ost_read_support_filter_lzop(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_lzop);
+}
+
+CAMLprim value ost_read_support_filter_none(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_none);
+}
+
+CAMLprim value ost_read_support_filter_rpm(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_rpm);
+}
+
+CAMLprim value ost_read_support_filter_uu(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_uu);
+}
+
+CAMLprim value ost_read_support_filter_xz(value a)
+{
+    return ost_archive_configure(a, archive_read_support_filter_xz);
+}
+
+CAMLprim value ost_read_support_format_7zip(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_7zip);
+}
+
 CAMLprim value ost_read_support_format_all(value a)
 {
     return ost_archive_configure(a, archive_read_support_format_all);
 }
 
+CAMLprim value ost_read_support_format_ar(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_ar);
+}
+
+CAMLprim value ost_read_support_format_cab(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_cab);
+}
+
+CAMLprim value ost_read_support_format_cpio(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_cpio);
+}
+
+CAMLprim value ost_read_support_format_gnutar(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_gnutar);
+}
+
+CAMLprim value ost_read_support_format_iso9660(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_iso9660);
+}
+
+CAMLprim value ost_read_support_format_lha(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_lha);
+}
+
+CAMLprim value ost_read_support_format_mtree(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_mtree);
+}
+
+CAMLprim value ost_read_support_format_rar(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_rar);
+}
+
 CAMLprim value ost_read_support_format_raw(value a)
 {
     return ost_archive_configure(a, archive_read_support_format_raw);
+}
+
+CAMLprim value ost_read_support_format_tar(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_tar);
+}
+
+CAMLprim value ost_read_support_format_xar(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_xar);
+}
+
+CAMLprim value ost_read_support_format_zip(value a)
+{
+    return ost_archive_configure(a, archive_read_support_format_zip);
 }
 
 /* create a new archive handle that can be used for writing archives
