@@ -180,6 +180,12 @@ CAMLprim value ost_read_support_filter_all(value a)
     return ost_archive_configure(a, archive_read_support_filter_all);
 }
 
+/* read filters: they add support for detecting and reading an archive
+ * that is compressed using this filter.
+ *
+ * Most of the time you just want to use all filters.
+ */
+
 CAMLprim value ost_read_support_filter_bzip2(value a)
 {
     return ost_archive_configure(a, archive_read_support_filter_bzip2);
@@ -239,6 +245,13 @@ CAMLprim value ost_read_support_filter_xz(value a)
 {
     return ost_archive_configure(a, archive_read_support_filter_xz);
 }
+
+/* read formats. Add support for detecting and reading specific archive
+ * formats.
+ * Most of the time you want to detect and read all possible formats.
+ * Note: All formats exclude the raw format, so in case you want to read
+ * the raw format (e.g. file.gz) you need to enable the raw format explicitly
+ */
 
 CAMLprim value ost_read_support_format_7zip(value a)
 {
@@ -317,6 +330,16 @@ CAMLprim value ost_write_new(value unit)
     return ost_new(archive_write_new);
 }
 
+/* open a block of memory for the write handle, so it knows where to
+ * write the decompressed data to.
+ * This function is not the same as archive_write_open_memory but uses a
+ * data structure that grows automatically.
+ * This function takes a write handle, a pointer to the buffer and a
+ * pointer to how many bytes were written. The latter two types are
+ * opaque and can be created by write_buffer_new and written_ptr_new from
+ * the OCaml code. Both have to be freed manually from the OCaml code,
+ * too.
+ */
 CAMLprim value ost_write_open_memory(value a, value b, value w)
 {
     archive* handle = Archive_val(a);
@@ -328,20 +351,38 @@ CAMLprim value ost_write_open_memory(value a, value b, value w)
     return Val_int(map_errorcode(retval));
 }
 
+/* creates a pointer marking the write progress. Returns an opaque type
+ * to OCaml. The exact contents don't matter for OCaml code but it needs
+ * to be passed around.
+ */
 CAMLprim value ost_written_ptr_new(value u)
 {
+    /* allocate one block on the heap to store a value */
     size_t* written = malloc(sizeof (size_t*));
-    /* TODO: error handling */
+    /* TODO: error handling when malloc fails */
+    /* set the contents to zero, since nothing was written yet */
     *written = 0;
+    /* return opaque type */
     return (value)written;
 }
 
+/* Reads the stored value in a written_ptr and returns an OCaml type
+ * containing the value.
+ *
+ * This function can be used for debugging, it is not required to ever read
+ * the stored value in OCaml.
+ */
 CAMLprim value ost_written_ptr_read(value w)
 {
     size_t* written = (size_t*)w;
+    /* TODO int64? */
     return Val_int(*written);
 }
 
+/* Frees the pointers storage from the heap. After calling this function,
+ * the OCaml value is INVALID and should not be used, because it points
+ * to a freed memory region which might contain anything.
+ */
 CAMLprim value ost_written_ptr_free(value w)
 {
     size_t* written = (size_t*)w;
@@ -349,28 +390,38 @@ CAMLprim value ost_written_ptr_free(value w)
     return Val_unit;
 }
 
+/* Creates a block that holds the pointer to the buffer which will contain
+ * the data that is written out
+ */
 CAMLprim value ost_write_buffer_new(value u)
 {
     char** buffer = malloc(sizeof (char**));
+    /* TODO: error handling */
     /* Initialize to "uninitialized" */
     *buffer = NULL;
+    /* return opaque type */
     return (value)buffer;
 }
 
+/* return an OCaml string that contains the data in the buffer */
 CAMLprim value ost_write_buffer_read(value b, value w)
 {
     CAMLlocal1(ml_data);
     char** buffer = (char**)b;
     size_t* written = (size_t*)w;
 
+    /* create an OCaml string that is *written bytes long */
     ml_data = caml_alloc_string(*written);
+    /* copy the contents from the C string to the OCaml string */
     memcpy(String_val(ml_data), *buffer, *written);
     return ml_data;
 }
 
+/* Free the C buffer as well as the buffer pointer. */
 CAMLprim value ost_write_buffer_free(value b)
 {
     char** buffer = (char**)b;
+    /* TODO: don't free if *buffer is NULL */
     free(*buffer);
     free(buffer);
     return Val_unit;
@@ -382,29 +433,40 @@ CAMLprim value ost_write_header(value a, value e)
     entry* entry = Entry_val(e);
 
     int retval = archive_write_header(*handle, *entry);
+    /* map the errorcode from libarchive to OStreamer and return as OCaml
+     * int */
     return Val_int(map_errorcode(retval));
 }
 
+/* writes the file content after storing the header.
+ * Takes a write handle, the data in an OCaml string and the
+ * size as integer
+ */
 CAMLprim value ost_write_data(value a, value b, value s)
 {
     archive* handle = Archive_val(a);
     char* buffer = String_val(b);
+    /* TODO: use int64 instead? */
     size_t size = Int_val(s);
-    /* printf("Writing size: %zu\n", size); */
-    /* fwrite(buffer, 1, size, stderr); */
 
-    int written = archive_write_data(*handle, buffer, size);
-    /* printf("Retval write_data = %d\n", written); */
-    /* printf("Error: %s\n", archive_error_string(*handle)); */
+    ssize_t written = archive_write_data(*handle, buffer, size);
+    /* returns the number of bytes that were written as an integer,
+     * NOT a status value */
+    /* TODO: return int64 instead? */
     return Val_int(written);
 }
 
+/* Closes an archive write handle */
 CAMLprim value ost_write_close(value a)
 {
     archive* handle = Archive_val(a);
     int retval = archive_write_close(*handle);
     return Val_int(map_errorcode(retval));
 }
+
+/* configure the format which to write. Setting more than one format causes
+ * the previous setting to be overwritten
+ */
 
 CAMLprim value ost_write_set_format_7zip(value a)
 {
