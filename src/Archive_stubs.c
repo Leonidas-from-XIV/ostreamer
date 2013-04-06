@@ -347,7 +347,8 @@ CAMLprim value ost_read_support_format_zip(value a)
  */
 CAMLprim value ost_write_new(value unit)
 {
-    return ost_new(archive_write_new);
+    CAMLparam1(unit);
+    CAMLreturn(ost_new(archive_write_new));
 }
 
 /* open a block of memory for the write handle, so it knows where to
@@ -362,13 +363,16 @@ CAMLprim value ost_write_new(value unit)
  */
 CAMLprim value ost_write_open_memory(value a, value b, value w)
 {
+    CAMLparam3(a, b, w);
+    CAMLlocal1(r);
     archive* handle = Archive_val(a);
     char** bufptr = (char**)b;
     size_t* wptr = (size_t*)w;
 
     int retval = ost_write_open_dynamic_memory(*handle, bufptr, wptr);
 
-    return Val_int(map_errorcode(retval));
+    r = Val_int(map_errorcode(retval));
+    CAMLreturn(r);
 }
 
 /* creates a pointer marking the write progress. Returns an opaque type
@@ -427,6 +431,7 @@ CAMLprim value ost_write_buffer_new(value u)
 /* return an OCaml string that contains the data in the buffer */
 CAMLprim value ost_write_buffer_read(value b, value w)
 {
+    CAMLparam2(b, w);
     CAMLlocal1(ml_data);
     char** buffer = (char**)b;
     size_t* written = (size_t*)w;
@@ -435,7 +440,7 @@ CAMLprim value ost_write_buffer_read(value b, value w)
     ml_data = caml_alloc_string(*written);
     /* copy the contents from the C string to the OCaml string */
     memcpy(String_val(ml_data), *buffer, *written);
-    return ml_data;
+    CAMLreturn(ml_data);
 }
 
 /* Free the C buffer as well as the buffer pointer. */
@@ -451,13 +456,16 @@ CAMLprim value ost_write_buffer_free(value b)
 
 CAMLprim value ost_write_header(value a, value e)
 {
+    CAMLparam2(a, e);
+    CAMLlocal1(r);
     archive* handle = Archive_val(a);
     entry* entry = Entry_val(e);
 
     int retval = archive_write_header(*handle, *entry);
     /* map the errorcode from libarchive to OStreamer and return as OCaml
      * int */
-    return Val_int(map_errorcode(retval));
+    r = Val_int(map_errorcode(retval));
+    CAMLreturn(r);
 }
 
 /* writes the file content after storing the header.
@@ -466,6 +474,8 @@ CAMLprim value ost_write_header(value a, value e)
  */
 CAMLprim value ost_write_data(value a, value b, value s)
 {
+    CAMLparam3(a, b, s);
+    CAMLlocal1(r);
     archive* handle = Archive_val(a);
     char* buffer = String_val(b);
     /* TODO: use int64 instead? */
@@ -475,15 +485,19 @@ CAMLprim value ost_write_data(value a, value b, value s)
     /* returns the number of bytes that were written as an integer,
      * NOT a status value */
     /* TODO: return int64 instead? */
-    return Val_int(written);
+    r = Val_int(written);
+    CAMLreturn(r);
 }
 
 /* Closes an archive write handle */
 CAMLprim value ost_write_close(value a)
 {
+    CAMLparam1(a);
+    CAMLlocal1(r);
     archive* handle = Archive_val(a);
     int retval = archive_write_close(*handle);
-    return Val_int(map_errorcode(retval));
+    r = Val_int(map_errorcode(retval));
+    CAMLreturn(r);
 }
 
 /* configure the format which to write. Setting more than one format causes
@@ -687,6 +701,7 @@ static void ost_entry_free(value e)
 
 CAMLprim value ost_entry_set_filetype(value e, value t)
 {
+    CAMLparam2(e, t);
     entry* entry = Entry_val(e);
     int ocaml_type = Int_val(t);
     unsigned int type = 0;
@@ -704,7 +719,7 @@ CAMLprim value ost_entry_set_filetype(value e, value t)
 
     archive_entry_set_filetype(*entry, type);
 
-    return Val_unit;
+    CAMLreturn(Val_unit);
 }
 
 CAMLprim value ost_entry_filetype(value e)
@@ -830,11 +845,12 @@ CAMLprim value ost_entry_birthtime(value e)
 
 CAMLprim value ost_entry_set_pathname(value e, value p)
 {
+    CAMLparam2(e, p);
     entry* ent = Entry_val(e);
     char* path = String_val(p);
 
     archive_entry_set_pathname(*ent, path);
-    return Val_unit;
+    CAMLreturn(Val_unit);
 }
 
 CAMLprim value ost_entry_set_size(value e, value s)

@@ -219,6 +219,7 @@ let write_close writehandle =
     let retval = write_close_c archive in
     match retval with
     | Ok -> let content = write_buffer_read buff written in
+    (* Gc.full_major (); *)
       ErrorMonad.Success(content)
     | _ -> let errcode = errno archive in
       let errstr = error_string archive in
@@ -281,7 +282,6 @@ let feed_data handlemonad data =
 
 let extract_all = function
   | ErrorMonad.Success (archive) -> (let entry = entry_new_shared () in
-      (* Gc.full_major (); *)
           (*
            * go through the whole archive until you reach Eof and convert raw data
            * into structured OCaml types
@@ -438,6 +438,7 @@ let read_new_configured formats filters =
 
 let write_new_configured format filters =
   let handle = write_new () in
+  (* Gc.full_major (); *)
   let buffer = write_buffer_new () in
   let written = written_ptr_new () in
   let formatted_handle = apply_write_format format handle in
