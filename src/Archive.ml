@@ -131,8 +131,7 @@ external read_data: archive -> string ref -> int -> int = "ost_read_data"
 external read_data_block: archive -> string ref -> int ref -> int ref -> int = "ost_read_data_block"
 
 external entry_new: unit -> entry = "ost_entry_new"
-external entry_new_ptr: unit -> entry = "ost_entry_new_ptr"
-(* external entry_free: entry -> unit = "ost_entry_free" *)
+external entry_new_shared: unit -> entry = "ost_entry_new_shared"
 external entry_set_filetype: entry -> Unix.file_kind -> unit = "ost_entry_set_filetype"
 external entry_set_pathname: entry -> string -> unit = "ost_entry_set_pathname"
 external entry_set_size: entry -> int64 -> unit = "ost_entry_set_size"
@@ -281,7 +280,7 @@ let feed_data handlemonad data =
       ErrorMonad.Failure(errcode, errstr))
 
 let extract_all = function
-  | ErrorMonad.Success (archive) -> (let entry = entry_new () in
+  | ErrorMonad.Success (archive) -> (let entry = entry_new_shared () in
       (* Gc.full_major (); *)
           (*
            * go through the whole archive until you reach Eof and convert raw data

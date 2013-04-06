@@ -49,9 +49,21 @@ static struct custom_operations archive_ops = {
     deserialize: custom_deserialize_default
 };
 
-static struct custom_operations entry_ops = {
-    identifier: "entry",
-    /* finalize: ost_entry_free, */
+/* an own entry needs to be freed by this binding */
+static struct custom_operations own_entry_ops = {
+    identifier: "own_entry",
+    /* finalize is set accordingly */
+    finalize: ost_entry_free,
+    compare: custom_compare_default,
+    hash: custom_hash_default,
+    serialize: custom_serialize_default,
+    deserialize: custom_deserialize_default
+};
+
+/* a shared entry is returned by libarchive and freed by libarchive */
+static struct custom_operations shared_entry_ops = {
+    identifier: "shared_entry",
+    /* finalize is set to the default value, so it does not free */
     finalize: custom_finalize_default,
     compare: custom_compare_default,
     hash: custom_hash_default,
@@ -161,7 +173,8 @@ static void ost_read_free(value a)
 {
     archive* handle = Archive_val(a);
     printf("Freeing (read/write) handle.\n");
-    archive_free(*handle);
+    /* TODO: archive_free? */
+    /* archive_free(*handle); */
 }
 
 /* TODO: ost_write_free? */
@@ -643,7 +656,7 @@ CAMLprim value ost_entry_new(value unit)
     CAMLparam1(unit);
     CAMLlocal1(ml_value);
     entry ent = archive_entry_new();
-    ml_value = caml_alloc_custom(&entry_ops, sizeof(entry), 0, 1);
+    ml_value = caml_alloc_custom(&own_entry_ops, sizeof(entry), 0, 1);
     /* get C value out of OCaml entry type */
     entry* ptr = Entry_val(ml_value);
     /* and set its contents to the C entry type */
@@ -652,19 +665,19 @@ CAMLprim value ost_entry_new(value unit)
     CAMLreturn(ml_value);
 }
 
-/* an unpopulated entry, does not need to be freed */
-CAMLprim value ost_entry_new_ptr(value unit)
+/* an unpopulated entry, does not need to be freed, will be freed by
+ * libarchive */
+CAMLprim value ost_entry_new_shared(value unit)
 {
     CAMLparam1(unit);
     CAMLlocal1(ml_value);
-    ml_value = caml_alloc_custom(&entry_ops, sizeof(entry), 0, 1);
+    ml_value = caml_alloc_custom(&shared_entry_ops, sizeof(entry), 0, 1);
     CAMLreturn(ml_value);
 }
 
 /* frees a handle. This needs to be called on all handles created by
  * entry_new, but not on ones that libarchive returns
  */
-/* TODO export */
 static void ost_entry_free(value e)
 {
     entry* ent = Entry_val(e);

@@ -91,5 +91,5 @@ let suite = "Simple tests" >::: [
 ]
 
 let _ =
-  (* at_exit Gc.full_major; *)
+  at_exit Gc.full_major;
   run_test_tt_main suite
