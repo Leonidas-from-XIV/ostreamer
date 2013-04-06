@@ -35,13 +35,14 @@ typedef struct archive_entry* entry;
 #define Ref_val(v) (Field((v),0))
 
 /* prototypes, required for the callbacks */
-void ost_read_free(value a);
+static void ost_read_free(value a);
 static void ost_entry_free(value e);
 
 /* custom blocks for the two types that libarchive uses: archive and entry */
 static struct custom_operations archive_ops = {
     identifier: "archive",
     finalize: ost_read_free,
+    /* finalize: custom_finalize_default, */
     compare: custom_compare_default,
     hash: custom_hash_default,
     serialize: custom_serialize_default,
@@ -50,7 +51,8 @@ static struct custom_operations archive_ops = {
 
 static struct custom_operations entry_ops = {
     identifier: "entry",
-    finalize: ost_entry_free,
+    /* finalize: ost_entry_free, */
+    finalize: custom_finalize_default,
     compare: custom_compare_default,
     hash: custom_hash_default,
     serialize: custom_serialize_default,
@@ -131,7 +133,7 @@ CAMLprim value ost_version_string(value unit)
  * function. This function is not exported and only used by ost_read_new and
  * ost_write_new.
  */
-static CAMLprim value ost_new(archive (*new)(void))
+static value ost_new(archive (*new)(void))
 {
     /* create a CAML value instance */
     CAMLlocal1(ml_value);
@@ -147,7 +149,8 @@ static CAMLprim value ost_new(archive (*new)(void))
 /* create and return a read handle */
 CAMLprim value ost_read_new(value unit)
 {
-    return ost_new(archive_read_new);
+    CAMLparam1(unit);
+    CAMLreturn(ost_new(archive_read_new));
 }
 
 /* This function frees an archive. It is not exposed to the OCaml interface
@@ -157,10 +160,12 @@ CAMLprim value ost_read_new(value unit)
 static void ost_read_free(value a)
 {
     archive* handle = Archive_val(a);
-    archive_read_free(*handle);
+    printf("Freeing (read/write) handle.\n");
+    archive_free(*handle);
 }
 
 /* TODO: ost_write_free? */
+/* TODO: better ost_archive_free which checks archive.magic */
 
 /* Function for setting setting filters/formats. It is not exposed directly to
  * the OCaml interface but used internally for callbacks by other functions
@@ -388,6 +393,7 @@ CAMLprim value ost_written_ptr_read(value w)
 CAMLprim value ost_written_ptr_free(value w)
 {
     size_t* written = (size_t*)w;
+    printf("Freeing written_ptr\n");
     free(written);
     return Val_unit;
 }
@@ -423,6 +429,7 @@ CAMLprim value ost_write_buffer_read(value b, value w)
 CAMLprim value ost_write_buffer_free(value b)
 {
     char** buffer = (char**)b;
+    printf("Freeing write buffer\n");
     /* TODO: don't free if *buffer is NULL */
     free(*buffer);
     free(buffer);
@@ -633,6 +640,7 @@ CAMLprim value ost_read_open_memory(value a, value buff, value size)
 /* Creates a new entry element out of nowhere. */
 CAMLprim value ost_entry_new(value unit)
 {
+    CAMLparam1(unit);
     CAMLlocal1(ml_value);
     entry ent = archive_entry_new();
     ml_value = caml_alloc_custom(&entry_ops, sizeof(entry), 0, 1);
@@ -641,15 +649,26 @@ CAMLprim value ost_entry_new(value unit)
     /* and set its contents to the C entry type */
     *ptr = ent;
 
-    return ml_value;
+    CAMLreturn(ml_value);
+}
+
+/* an unpopulated entry, does not need to be freed */
+CAMLprim value ost_entry_new_ptr(value unit)
+{
+    CAMLparam1(unit);
+    CAMLlocal1(ml_value);
+    ml_value = caml_alloc_custom(&entry_ops, sizeof(entry), 0, 1);
+    CAMLreturn(ml_value);
 }
 
 /* frees a handle. This needs to be called on all handles created by
  * entry_new, but not on ones that libarchive returns
  */
+/* TODO export */
 static void ost_entry_free(value e)
 {
     entry* ent = Entry_val(e);
+    printf("Freeing entry\n");
     archive_entry_free(*ent);
 }
 

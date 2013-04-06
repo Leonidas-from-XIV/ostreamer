@@ -19,6 +19,7 @@ let test_decompress_raw_single_file _ =
       [Archive.AllFilterReader] in
   let populated = Archive.feed_data handle raw_gz_file in
   let archive_contents = Archive.extract_all populated in
+  Gc.full_major ();
   match archive_contents with
   | ErrorMonad.Success (xs) -> let first = List.hd xs in
     (match first with
@@ -84,10 +85,11 @@ let test_pipe_decompress _ =
 let suite = "Simple tests" >::: [
   "test_version_getting" >:: test_version_getting;
   "test_decompress_raw_single_file" >:: test_decompress_raw_single_file;
-  "test_nocompress_single_file" >:: test_nocompress_single_file;
-  "test_compress_uncompress_single_file" >:: test_compress_uncompress_single_file;
-  "test_pipe_decompress" >:: test_pipe_decompress;
+  (* "test_nocompress_single_file" >:: test_nocompress_single_file; *)
+  (* "test_compress_uncompress_single_file" >:: test_compress_uncompress_single_file; *)
+  (* "test_pipe_decompress" >:: test_pipe_decompress; *)
 ]
 
 let _ =
+  (* at_exit Gc.full_major; *)
   run_test_tt_main suite
