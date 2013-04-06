@@ -35,14 +35,13 @@ typedef struct archive_entry* entry;
 #define Ref_val(v) (Field((v),0))
 
 /* prototypes, required for the callbacks */
-static void ost_read_free(value a);
+static void ost_archive_free(value a);
 static void ost_entry_free(value e);
 
 /* custom blocks for the two types that libarchive uses: archive and entry */
 static struct custom_operations archive_ops = {
     identifier: "archive",
-    finalize: ost_read_free,
-    /* finalize: custom_finalize_default, */
+    finalize: ost_archive_free,
     compare: custom_compare_default,
     hash: custom_hash_default,
     serialize: custom_serialize_default,
@@ -169,16 +168,12 @@ CAMLprim value ost_read_new(value unit)
  * so it doesn't return an unit type but void, since it is called by the
  * custom block handler
  */
-static void ost_read_free(value a)
+static void ost_archive_free(value a)
 {
     archive* handle = Archive_val(a);
-    printf("Freeing (read/write) handle.\n");
-    /* TODO: archive_free? */
-    /* archive_free(*handle); */
+    /* requires libarchive >= 3ae99fbc24 as archive_free was added there */
+    archive_free(*handle);
 }
-
-/* TODO: ost_write_free? */
-/* TODO: better ost_archive_free which checks archive.magic */
 
 /* Function for setting setting filters/formats. It is not exposed directly to
  * the OCaml interface but used internally for callbacks by other functions

@@ -90,5 +90,6 @@ let suite = "Simple tests" >::: [
 ]
 
 let _ =
+  (* useful for detecting failures that trip up the GC *)
   at_exit Gc.full_major;
   run_test_tt_main suite
