@@ -196,7 +196,6 @@ external written_ptr_read: written_ptr -> int = "ost_written_ptr_read"
 
 external write_buffer_new: unit -> write_buffer_ptr = "ost_write_buffer_new"
 external write_buffer_read: write_buffer_ptr -> written_ptr -> string = "ost_write_buffer_read"
-external write_buffer_free: write_buffer_ptr -> unit = "ost_write_buffer_free"
 
 (* TODO: add remaining arguments *)
 let generate_metadata ?(filetype=Unix.S_REG) pathname =
