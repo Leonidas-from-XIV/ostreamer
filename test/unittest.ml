@@ -85,8 +85,8 @@ let suite = "Simple tests" >::: [
   "test_version_getting" >:: test_version_getting;
   "test_decompress_raw_single_file" >:: test_decompress_raw_single_file;
   "test_nocompress_single_file" >:: test_nocompress_single_file;
-  (* "test_compress_uncompress_single_file" >:: test_compress_uncompress_single_file; *)
-  (* "test_pipe_decompress" >:: test_pipe_decompress; *)
+  "test_compress_uncompress_single_file" >:: test_compress_uncompress_single_file;
+  "test_pipe_decompress" >:: test_pipe_decompress;
 ]
 
 let _ =
