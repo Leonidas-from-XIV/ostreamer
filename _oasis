@@ -3,12 +3,13 @@ Name:        ostreamer
 Version:     0.1
 Synopsis:    Library to deal with data streams
 Authors:     Marek Kubica
-License:     PROP
+License:     LGPL-2.1 with OCaml linking exception
+LicenseFile: COPYING
 Plugins:     META (0.3), DevFiles (0.3)
 
 Library "ost"
   Path:       src/
-  Modules:    ErrorMonad, Archive
+  Modules:    ErrorMonad, Archive, Pipe
   CSources:   Archive_stubs.c, ost_write_open_memory.c, ost_write_open_memory.h
   CCLib:      -L/home/marek/libarchive/tmp/libarchive -larchive
   BuildTools: ocamlbuild
