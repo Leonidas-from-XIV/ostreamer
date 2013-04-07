@@ -191,7 +191,6 @@ external write_close_c: archive -> status = "ost_write_close"
 external print_pointer: entry -> unit = "ost_print_pointer"
 
 external written_ptr_new: unit -> written_ptr = "ost_written_ptr_new"
-external written_ptr_free: written_ptr -> unit = "ost_written_ptr_free"
 external written_ptr_read: written_ptr -> int = "ost_written_ptr_read"
 
 external write_buffer_new: unit -> write_buffer_ptr = "ost_write_buffer_new"

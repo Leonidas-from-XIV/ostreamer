@@ -32,6 +32,7 @@ typedef struct archive_entry* entry;
 #define Archive_val(v) ((struct archive**)(Data_custom_val(v)))
 #define Entry_val(v) ((struct archive_entry**)(Data_custom_val(v)))
 #define Write_buffer_val(v) ((char**)(Data_custom_val(v)))
+#define Written_ptr_val(v) ((size_t*)(Data_custom_val(v)))
 /* an OCaml ref is the first entry of a field. Can also be used as lvalue */
 #define Ref_val(v) (Field((v),0))
 
@@ -39,6 +40,7 @@ typedef struct archive_entry* entry;
 static void ost_archive_free(value a);
 static void ost_entry_free(value e);
 static void ost_write_buffer_free(value b);
+static void ost_written_ptr_free(value w);
 
 /* custom blocks for the two types that libarchive uses: archive and entry */
 static struct custom_operations archive_ops = {
@@ -74,8 +76,16 @@ static struct custom_operations shared_entry_ops = {
 
 static struct custom_operations write_buffer_ops = {
     identifier: "write_buffer",
-    /* finalize is set to the default value, so it does not free */
     finalize: ost_write_buffer_free,
+    compare: custom_compare_default,
+    hash: custom_hash_default,
+    serialize: custom_serialize_default,
+    deserialize: custom_deserialize_default
+};
+
+static struct custom_operations written_ptr_ops = {
+    identifier: "written_ptr",
+    finalize: ost_written_ptr_free,
     compare: custom_compare_default,
     hash: custom_hash_default,
     serialize: custom_serialize_default,
@@ -374,7 +384,7 @@ CAMLprim value ost_write_open_memory(value a, value b, value w)
     CAMLlocal1(r);
     archive* handle = Archive_val(a);
     char** bufptr = Write_buffer_val(b);
-    size_t* wptr = (size_t*)w;
+    size_t* wptr = Written_ptr_val(w);
 
     int retval = ost_write_open_dynamic_memory(*handle, bufptr, wptr);
 
@@ -388,13 +398,17 @@ CAMLprim value ost_write_open_memory(value a, value b, value w)
  */
 CAMLprim value ost_written_ptr_new(value u)
 {
+    CAMLparam1(u);
+    CAMLlocal1(ml_value);
+    ml_value = caml_alloc_custom(&written_ptr_ops, sizeof(size_t*), 0, 1);
+    size_t* written = Written_ptr_val(ml_value);
     /* allocate one block on the heap to store a value */
-    size_t* written = malloc(sizeof (size_t*));
+    /* size_t* written = malloc(sizeof (size_t*)); */
     /* TODO: error handling when malloc fails */
     /* set the contents to zero, since nothing was written yet */
     *written = 0;
     /* return opaque type */
-    return (value)written;
+    CAMLreturn(ml_value);
 }
 
 /* Reads the stored value in a written_ptr and returns an OCaml type
@@ -405,7 +419,7 @@ CAMLprim value ost_written_ptr_new(value u)
  */
 CAMLprim value ost_written_ptr_read(value w)
 {
-    size_t* written = (size_t*)w;
+    size_t* written = Written_ptr_val(w);
     /* TODO int64? */
     return Val_int(*written);
 }
@@ -414,12 +428,13 @@ CAMLprim value ost_written_ptr_read(value w)
  * the OCaml value is INVALID and should not be used, because it points
  * to a freed memory region which might contain anything.
  */
-CAMLprim value ost_written_ptr_free(value w)
+static void ost_written_ptr_free(value w)
 {
-    size_t* written = (size_t*)w;
+    /* This function is strictly speaking not really required */
+    CAMLparam1(w);
+    size_t* written = Written_ptr_val(w);
     printf("Freeing written_ptr\n");
-    free(written);
-    return Val_unit;
+    CAMLreturn0;
 }
 
 /* Creates a block that holds the pointer to the buffer which will contain
@@ -445,7 +460,7 @@ CAMLprim value ost_write_buffer_read(value b, value w)
     CAMLparam2(b, w);
     CAMLlocal1(ml_data);
     char** buffer = Write_buffer_val(b);
-    size_t* written = (size_t*)w;
+    size_t* written = Written_ptr_val(w);
 
     /* create an OCaml string that is *written bytes long */
     ml_data = caml_alloc_string(*written);
