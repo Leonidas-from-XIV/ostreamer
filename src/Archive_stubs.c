@@ -170,7 +170,7 @@ static int map_errorcode(int retval)
     return OST_FATAL;
 }
 
-CAMLprim value ost_version_number(value u)
+value ost_version_number(value u)
 {
     CAMLparam1(u);
     CAMLlocal1(r);
@@ -179,7 +179,7 @@ CAMLprim value ost_version_number(value u)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_version_string(value u)
+value ost_version_string(value u)
 {
     CAMLparam1(u);
     CAMLlocal1(r);
@@ -206,7 +206,7 @@ static value ost_new(archive (*new)(void))
 }
 
 /* create and return a read handle */
-CAMLprim value ost_read_new(value u)
+value ost_read_new(value u)
 {
     CAMLparam1(u);
     CAMLreturn(ost_new(archive_read_new));
@@ -230,7 +230,7 @@ static void ost_archive_free(value a)
  * like ost_read_support_filter_all to avoid writing the same code all the
  * time replacing one single function call.
  */
-static CAMLprim value ost_archive_configure(value a, int (*set)(struct archive*))
+static value ost_archive_configure(value a, int (*set)(struct archive*))
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -243,7 +243,7 @@ static CAMLprim value ost_archive_configure(value a, int (*set)(struct archive*)
 /* configuration functions, they set format or filter support by calling
  * ost_archive_configure and returning its return value
  */
-CAMLprim value ost_read_support_filter_all(value a)
+value ost_read_support_filter_all(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -257,7 +257,7 @@ CAMLprim value ost_read_support_filter_all(value a)
  * Most of the time you just want to use all filters.
  */
 
-CAMLprim value ost_read_support_filter_bzip2(value a)
+value ost_read_support_filter_bzip2(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -265,7 +265,7 @@ CAMLprim value ost_read_support_filter_bzip2(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_compress(value a)
+value ost_read_support_filter_compress(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -273,7 +273,7 @@ CAMLprim value ost_read_support_filter_compress(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_grzip(value a)
+value ost_read_support_filter_grzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -281,7 +281,7 @@ CAMLprim value ost_read_support_filter_grzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_gzip(value a)
+value ost_read_support_filter_gzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -289,7 +289,7 @@ CAMLprim value ost_read_support_filter_gzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_lrzip(value a)
+value ost_read_support_filter_lrzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -297,7 +297,7 @@ CAMLprim value ost_read_support_filter_lrzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_lzip(value a)
+value ost_read_support_filter_lzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -305,7 +305,7 @@ CAMLprim value ost_read_support_filter_lzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_lzma(value a)
+value ost_read_support_filter_lzma(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -313,7 +313,7 @@ CAMLprim value ost_read_support_filter_lzma(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_lzop(value a)
+value ost_read_support_filter_lzop(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -321,7 +321,7 @@ CAMLprim value ost_read_support_filter_lzop(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_none(value a)
+value ost_read_support_filter_none(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -329,7 +329,7 @@ CAMLprim value ost_read_support_filter_none(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_rpm(value a)
+value ost_read_support_filter_rpm(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -337,7 +337,7 @@ CAMLprim value ost_read_support_filter_rpm(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_uu(value a)
+value ost_read_support_filter_uu(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -345,7 +345,7 @@ CAMLprim value ost_read_support_filter_uu(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_filter_xz(value a)
+value ost_read_support_filter_xz(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -360,7 +360,7 @@ CAMLprim value ost_read_support_filter_xz(value a)
  * the raw format (e.g. file.gz) you need to enable the raw format explicitly
  */
 
-CAMLprim value ost_read_support_format_7zip(value a)
+value ost_read_support_format_7zip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -368,7 +368,7 @@ CAMLprim value ost_read_support_format_7zip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_all(value a)
+value ost_read_support_format_all(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -376,7 +376,7 @@ CAMLprim value ost_read_support_format_all(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_ar(value a)
+value ost_read_support_format_ar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -384,7 +384,7 @@ CAMLprim value ost_read_support_format_ar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_cab(value a)
+value ost_read_support_format_cab(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -392,7 +392,7 @@ CAMLprim value ost_read_support_format_cab(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_cpio(value a)
+value ost_read_support_format_cpio(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -400,7 +400,7 @@ CAMLprim value ost_read_support_format_cpio(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_gnutar(value a)
+value ost_read_support_format_gnutar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -408,7 +408,7 @@ CAMLprim value ost_read_support_format_gnutar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_iso9660(value a)
+value ost_read_support_format_iso9660(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -416,7 +416,7 @@ CAMLprim value ost_read_support_format_iso9660(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_lha(value a)
+value ost_read_support_format_lha(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -424,7 +424,7 @@ CAMLprim value ost_read_support_format_lha(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_mtree(value a)
+value ost_read_support_format_mtree(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -432,7 +432,7 @@ CAMLprim value ost_read_support_format_mtree(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_rar(value a)
+value ost_read_support_format_rar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -440,7 +440,7 @@ CAMLprim value ost_read_support_format_rar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_raw(value a)
+value ost_read_support_format_raw(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -448,7 +448,7 @@ CAMLprim value ost_read_support_format_raw(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_tar(value a)
+value ost_read_support_format_tar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -456,7 +456,7 @@ CAMLprim value ost_read_support_format_tar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_xar(value a)
+value ost_read_support_format_xar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -464,7 +464,7 @@ CAMLprim value ost_read_support_format_xar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_support_format_zip(value a)
+value ost_read_support_format_zip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -474,7 +474,7 @@ CAMLprim value ost_read_support_format_zip(value a)
 
 /* create a new archive handle that can be used for writing archives
  */
-CAMLprim value ost_write_new(value u)
+value ost_write_new(value u)
 {
     CAMLparam1(u);
     CAMLlocal1(r);
@@ -492,7 +492,7 @@ CAMLprim value ost_write_new(value u)
  * the OCaml code. Both have to be freed manually from the OCaml code,
  * too.
  */
-CAMLprim value ost_write_open_memory(value a, value b, value w)
+value ost_write_open_memory(value a, value b, value w)
 {
     CAMLparam3(a, b, w);
     CAMLlocal1(r);
@@ -510,7 +510,7 @@ CAMLprim value ost_write_open_memory(value a, value b, value w)
  * to OCaml. The exact contents don't matter for OCaml code but it needs
  * to be passed around.
  */
-CAMLprim value ost_written_ptr_new(value u)
+value ost_written_ptr_new(value u)
 {
     CAMLparam1(u);
     CAMLlocal1(ml_value);
@@ -531,7 +531,7 @@ CAMLprim value ost_written_ptr_new(value u)
  * This function can be used for debugging, it is not required to ever read
  * the stored value in OCaml.
  */
-CAMLprim value ost_written_ptr_read(value w)
+value ost_written_ptr_read(value w)
 {
     CAMLparam1(w);
     CAMLlocal1(r);
@@ -557,7 +557,7 @@ static void ost_written_ptr_free(value w)
 /* Creates a block that holds the pointer to the buffer which will contain
  * the data that is written out
  */
-CAMLprim value ost_write_buffer_new(value u)
+value ost_write_buffer_new(value u)
 {
     CAMLparam1(u);
     CAMLlocal1(ml_value);
@@ -572,7 +572,7 @@ CAMLprim value ost_write_buffer_new(value u)
 }
 
 /* return an OCaml string that contains the data in the buffer */
-CAMLprim value ost_write_buffer_read(value b, value w)
+value ost_write_buffer_read(value b, value w)
 {
     CAMLparam2(b, w);
     CAMLlocal1(ml_data);
@@ -597,7 +597,7 @@ static void ost_write_buffer_free(value b)
     }
 }
 
-CAMLprim value ost_write_header(value a, value e)
+value ost_write_header(value a, value e)
 {
     CAMLparam2(a, e);
     CAMLlocal1(r);
@@ -615,7 +615,7 @@ CAMLprim value ost_write_header(value a, value e)
  * Takes a write handle, the data in an OCaml string and the
  * size as integer
  */
-CAMLprim value ost_write_data(value a, value b, value s)
+value ost_write_data(value a, value b, value s)
 {
     CAMLparam3(a, b, s);
     CAMLlocal1(r);
@@ -633,7 +633,7 @@ CAMLprim value ost_write_data(value a, value b, value s)
 }
 
 /* Closes an archive write handle */
-CAMLprim value ost_write_close(value a)
+value ost_write_close(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -647,7 +647,7 @@ CAMLprim value ost_write_close(value a)
  * the previous setting to be overwritten
  */
 
-CAMLprim value ost_write_set_format_7zip(value a)
+value ost_write_set_format_7zip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -655,7 +655,7 @@ CAMLprim value ost_write_set_format_7zip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_ar_bsd(value a)
+value ost_write_set_format_ar_bsd(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -663,7 +663,7 @@ CAMLprim value ost_write_set_format_ar_bsd(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_ar_svr4(value a)
+value ost_write_set_format_ar_svr4(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -671,7 +671,7 @@ CAMLprim value ost_write_set_format_ar_svr4(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_cpio(value a)
+value ost_write_set_format_cpio(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -679,7 +679,7 @@ CAMLprim value ost_write_set_format_cpio(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_cpio_newc(value a)
+value ost_write_set_format_cpio_newc(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -687,7 +687,7 @@ CAMLprim value ost_write_set_format_cpio_newc(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_gnutar(value a)
+value ost_write_set_format_gnutar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -695,7 +695,7 @@ CAMLprim value ost_write_set_format_gnutar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_iso9660(value a)
+value ost_write_set_format_iso9660(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -703,7 +703,7 @@ CAMLprim value ost_write_set_format_iso9660(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_mtree(value a)
+value ost_write_set_format_mtree(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -711,7 +711,7 @@ CAMLprim value ost_write_set_format_mtree(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_pax(value a)
+value ost_write_set_format_pax(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -719,7 +719,7 @@ CAMLprim value ost_write_set_format_pax(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_raw(value a)
+value ost_write_set_format_raw(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -731,7 +731,7 @@ CAMLprim value ost_write_set_format_raw(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_shar(value a)
+value ost_write_set_format_shar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -739,7 +739,7 @@ CAMLprim value ost_write_set_format_shar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_ustar(value a)
+value ost_write_set_format_ustar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -747,7 +747,7 @@ CAMLprim value ost_write_set_format_ustar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_v7tar(value a)
+value ost_write_set_format_v7tar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -755,7 +755,7 @@ CAMLprim value ost_write_set_format_v7tar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_xar(value a)
+value ost_write_set_format_xar(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -763,7 +763,7 @@ CAMLprim value ost_write_set_format_xar(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_set_format_zip(value a)
+value ost_write_set_format_zip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -772,7 +772,7 @@ CAMLprim value ost_write_set_format_zip(value a)
 }
 
 /* Filters for write handles. Multiple filters can be added, I think. */
-CAMLprim value ost_write_add_filter_b64encode(value a)
+value ost_write_add_filter_b64encode(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -780,7 +780,7 @@ CAMLprim value ost_write_add_filter_b64encode(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_bzip2(value a)
+value ost_write_add_filter_bzip2(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -788,7 +788,7 @@ CAMLprim value ost_write_add_filter_bzip2(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_compress(value a)
+value ost_write_add_filter_compress(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -796,7 +796,7 @@ CAMLprim value ost_write_add_filter_compress(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_grzip(value a)
+value ost_write_add_filter_grzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -804,7 +804,7 @@ CAMLprim value ost_write_add_filter_grzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_gzip(value a)
+value ost_write_add_filter_gzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -812,7 +812,7 @@ CAMLprim value ost_write_add_filter_gzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_lrzip(value a)
+value ost_write_add_filter_lrzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -820,7 +820,7 @@ CAMLprim value ost_write_add_filter_lrzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_lzip(value a)
+value ost_write_add_filter_lzip(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -828,7 +828,7 @@ CAMLprim value ost_write_add_filter_lzip(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_lzma(value a)
+value ost_write_add_filter_lzma(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -836,7 +836,7 @@ CAMLprim value ost_write_add_filter_lzma(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_lzop(value a)
+value ost_write_add_filter_lzop(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -844,7 +844,7 @@ CAMLprim value ost_write_add_filter_lzop(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_none(value a)
+value ost_write_add_filter_none(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -852,7 +852,7 @@ CAMLprim value ost_write_add_filter_none(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_uuencode(value a)
+value ost_write_add_filter_uuencode(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -860,7 +860,7 @@ CAMLprim value ost_write_add_filter_uuencode(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_write_add_filter_xz(value a)
+value ost_write_add_filter_xz(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -878,7 +878,7 @@ void dump_buffer(char* buffer, size_t len)
 }
 
 /* Opens a read handle: basically set the buffer from which to read data */
-CAMLprim value ost_read_open_memory(value a, value buff, value size)
+value ost_read_open_memory(value a, value buff, value size)
 {
     CAMLparam3(a, buff, size);
     CAMLlocal1(r);
@@ -892,7 +892,7 @@ CAMLprim value ost_read_open_memory(value a, value buff, value size)
 }
 
 /* Creates a new entry element out of nowhere. */
-CAMLprim value ost_entry_new(value unit)
+value ost_entry_new(value unit)
 {
     CAMLparam1(unit);
     CAMLlocal1(ml_value);
@@ -908,7 +908,7 @@ CAMLprim value ost_entry_new(value unit)
 
 /* an unpopulated entry, does not need to be freed, will be freed by
  * libarchive */
-CAMLprim value ost_entry_new_shared(value unit)
+value ost_entry_new_shared(value unit)
 {
     CAMLparam1(unit);
     CAMLlocal1(ml_value);
@@ -926,7 +926,7 @@ static void ost_entry_free(value e)
     archive_entry_free(*ent);
 }
 
-CAMLprim value ost_entry_set_filetype(value e, value t)
+value ost_entry_set_filetype(value e, value t)
 {
     CAMLparam2(e, t);
     entry* entry = Entry_val(e);
@@ -949,7 +949,7 @@ CAMLprim value ost_entry_set_filetype(value e, value t)
     CAMLreturn(Val_unit);
 }
 
-CAMLprim value ost_entry_filetype(value e)
+value ost_entry_filetype(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -986,7 +986,7 @@ CAMLprim value ost_entry_filetype(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_next_header(value a, value e)
+value ost_read_next_header(value a, value e)
 {
     CAMLparam2(a, e);
     CAMLlocal1(r);
@@ -998,7 +998,7 @@ CAMLprim value ost_read_next_header(value a, value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_data(value a, value buff, value size)
+value ost_read_data(value a, value buff, value size)
 {
     CAMLparam3(a, buff, size);
     CAMLlocal1(r);
@@ -1011,7 +1011,7 @@ CAMLprim value ost_read_data(value a, value buff, value size)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_pathname(value e)
+value ost_entry_pathname(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1032,7 +1032,7 @@ static value Val_some(value v)
     CAMLreturn(some);
 }
 
-CAMLprim value ost_entry_size(value e)
+value ost_entry_size(value e)
 {
     CAMLparam1(e);
     CAMLlocal2(r, r1);
@@ -1049,7 +1049,7 @@ CAMLprim value ost_entry_size(value e)
 }
 
 /* get the entry, the callback to check for existance and the callback to get the value */
-static CAMLprim value ost_entry_read_time(value e, int (*check)(struct archive_entry *),
+static value ost_entry_read_time(value e, int (*check)(struct archive_entry *),
         time_t (*retrieve)(struct archive_entry*))
 {
     CAMLparam1(e);
@@ -1069,7 +1069,7 @@ static CAMLprim value ost_entry_read_time(value e, int (*check)(struct archive_e
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_mtime(value e)
+value ost_entry_mtime(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1078,7 +1078,7 @@ CAMLprim value ost_entry_mtime(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_atime(value e)
+value ost_entry_atime(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1087,7 +1087,7 @@ CAMLprim value ost_entry_atime(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_ctime(value e)
+value ost_entry_ctime(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1096,7 +1096,7 @@ CAMLprim value ost_entry_ctime(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_birthtime(value e)
+value ost_entry_birthtime(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1105,7 +1105,7 @@ CAMLprim value ost_entry_birthtime(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_set_pathname(value e, value p)
+value ost_entry_set_pathname(value e, value p)
 {
     CAMLparam2(e, p);
     entry* ent = Entry_val(e);
@@ -1115,7 +1115,7 @@ CAMLprim value ost_entry_set_pathname(value e, value p)
     CAMLreturn(Val_unit);
 }
 
-CAMLprim value ost_entry_set_size(value e, value s)
+value ost_entry_set_size(value e, value s)
 {
     CAMLparam2(e, s);
     entry* ent = Entry_val(e);
@@ -1125,7 +1125,7 @@ CAMLprim value ost_entry_set_size(value e, value s)
     CAMLreturn(Val_unit);
 }
 
-static CAMLprim value ost_entry_set_time(value e, value t, void (*set)(struct archive_entry*, time_t, long))
+static value ost_entry_set_time(value e, value t, void (*set)(struct archive_entry*, time_t, long))
 {
     CAMLparam2(e, t);
     entry* ent = Entry_val(e);
@@ -1138,7 +1138,7 @@ static CAMLprim value ost_entry_set_time(value e, value t, void (*set)(struct ar
     CAMLreturn(Val_unit);
 }
 
-CAMLprim value ost_entry_set_mtime(value e, value t)
+value ost_entry_set_mtime(value e, value t)
 {
     CAMLparam2(e, t);
     CAMLlocal1(r);
@@ -1146,7 +1146,7 @@ CAMLprim value ost_entry_set_mtime(value e, value t)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_set_atime(value e, value t)
+value ost_entry_set_atime(value e, value t)
 {
     CAMLparam2(e, t);
     CAMLlocal1(r);
@@ -1154,7 +1154,7 @@ CAMLprim value ost_entry_set_atime(value e, value t)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_set_ctime(value e, value t)
+value ost_entry_set_ctime(value e, value t)
 {
     CAMLparam2(e, t);
     CAMLlocal1(r);
@@ -1162,7 +1162,7 @@ CAMLprim value ost_entry_set_ctime(value e, value t)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_set_birthtime(value e, value t)
+value ost_entry_set_birthtime(value e, value t)
 {
     CAMLparam2(e, t);
     CAMLlocal1(r);
@@ -1170,7 +1170,7 @@ CAMLprim value ost_entry_set_birthtime(value e, value t)
     CAMLreturn(r);
 }
 
-static CAMLprim value ost_entry_set_usergroup(value e, value u, void (*set)(struct archive_entry*, __LA_INT64_T))
+static value ost_entry_set_usergroup(value e, value u, void (*set)(struct archive_entry*, __LA_INT64_T))
 {
     CAMLparam2(e, u);
     entry* ent = Entry_val(e);
@@ -1179,7 +1179,7 @@ static CAMLprim value ost_entry_set_usergroup(value e, value u, void (*set)(stru
     CAMLreturn(Val_unit);
 }
 
-CAMLprim value ost_entry_set_uid(value e, value u)
+value ost_entry_set_uid(value e, value u)
 {
     CAMLparam2(e, u);
     CAMLlocal1(r);
@@ -1187,7 +1187,7 @@ CAMLprim value ost_entry_set_uid(value e, value u)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_set_gid(value e, value g)
+value ost_entry_set_gid(value e, value g)
 {
     CAMLparam2(e, g);
     CAMLlocal1(r);
@@ -1195,7 +1195,7 @@ CAMLprim value ost_entry_set_gid(value e, value g)
     CAMLreturn(r);
 }
 
-static CAMLprim value ost_entry_set_usergroupname(value e, value n, void (*set)(struct archive_entry*, const char*))
+static value ost_entry_set_usergroupname(value e, value n, void (*set)(struct archive_entry*, const char*))
 {
     CAMLparam2(e, n);
     entry* ent = Entry_val(e);
@@ -1205,7 +1205,7 @@ static CAMLprim value ost_entry_set_usergroupname(value e, value n, void (*set)(
     CAMLreturn(Val_unit);
 }
 
-CAMLprim value ost_entry_set_uname(value e, value n)
+value ost_entry_set_uname(value e, value n)
 {
     CAMLparam2(e, n);
     CAMLlocal1(r);
@@ -1213,7 +1213,7 @@ CAMLprim value ost_entry_set_uname(value e, value n)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_set_gname(value e, value n)
+value ost_entry_set_gname(value e, value n)
 {
     CAMLparam2(e, n);
     CAMLlocal1(r);
@@ -1221,7 +1221,7 @@ CAMLprim value ost_entry_set_gname(value e, value n)
     CAMLreturn(r);
 }
 
-static CAMLprim value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(struct archive_entry *))
+static value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(struct archive_entry *))
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1231,7 +1231,7 @@ static CAMLprim value ost_entry_usergroup(value e, __LA_INT64_T (*retrieve)(stru
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_uid(value e)
+value ost_entry_uid(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1239,7 +1239,7 @@ CAMLprim value ost_entry_uid(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_gid(value e)
+value ost_entry_gid(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1247,7 +1247,7 @@ CAMLprim value ost_entry_gid(value e)
     CAMLreturn(r);
 }
 
-static CAMLprim value ost_entry_usergroupname(value e, const char* (*retrieve)(struct archive_entry *))
+static value ost_entry_usergroupname(value e, const char* (*retrieve)(struct archive_entry *))
 {
     CAMLparam1(e);
     CAMLlocal2(r, r1);
@@ -1262,7 +1262,7 @@ static CAMLprim value ost_entry_usergroupname(value e, const char* (*retrieve)(s
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_uname(value e)
+value ost_entry_uname(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1270,7 +1270,7 @@ CAMLprim value ost_entry_uname(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_entry_gname(value e)
+value ost_entry_gname(value e)
 {
     CAMLparam1(e);
     CAMLlocal1(r);
@@ -1278,7 +1278,7 @@ CAMLprim value ost_entry_gname(value e)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_read_data_block(value a, value buff, value size, value offset)
+value ost_read_data_block(value a, value buff, value size, value offset)
 {
     CAMLparam4(a, buff, size, offset);
     CAMLlocal2(r, ml_buff);
@@ -1297,7 +1297,7 @@ CAMLprim value ost_read_data_block(value a, value buff, value size, value offset
     CAMLreturn(r);
 }
 
-CAMLprim value ost_print_pointer(value pointer)
+value ost_print_pointer(value pointer)
 {
     CAMLparam1(pointer);
     entry* ent = Entry_val(pointer);
@@ -1305,7 +1305,7 @@ CAMLprim value ost_print_pointer(value pointer)
     CAMLreturn(Val_unit);
 }
 
-CAMLprim value ost_errno(value a)
+value ost_errno(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
@@ -1314,7 +1314,7 @@ CAMLprim value ost_errno(value a)
     CAMLreturn(r);
 }
 
-CAMLprim value ost_error_string(value a)
+value ost_error_string(value a)
 {
     CAMLparam1(a);
     CAMLlocal1(r);
