@@ -39,6 +39,14 @@
 /* local headers */
 #include "ost_write_open_memory.h"
 
+/* debug print stackoverflow.com/questions/1644868/ */
+#ifndef DEBUG
+#define DEBUG 0
+#endif /* DEBUG */
+
+#define debug_printf(fmt, s...) \
+            do { if (DEBUG) fprintf(stderr, fmt, ## s); } while (0)
+
 /* libarchive does not typedef the archive types, but we do.
  * The extent of typedef-ing (only typedef the struct? add a pointer to it?)
  * was inspired from ocaml-archive and works rather well
@@ -550,7 +558,7 @@ static void ost_written_ptr_free(value w)
     /* This function is strictly speaking not really required */
     CAMLparam1(w);
     size_t* written = Written_ptr_val(w);
-    printf("Freeing written_ptr\n");
+    debug_printf("Freeing written_ptr\n");
     CAMLreturn0;
 }
 
@@ -590,7 +598,7 @@ value ost_write_buffer_read(value b, value w)
 static void ost_write_buffer_free(value b)
 {
     char** buffer = Write_buffer_val(b);
-    printf("Freeing write buffer\n");
+    debug_printf("Freeing write buffer\n");
     /* Free only if memory was opened, so it doesn't contain NULL */
     if (*buffer != NULL) {
         free(*buffer);
@@ -922,7 +930,7 @@ value ost_entry_new_shared(value unit)
 static void ost_entry_free(value e)
 {
     entry* ent = Entry_val(e);
-    printf("Freeing entry\n");
+    debug_printf("Freeing entry\n");
     archive_entry_free(*ent);
 }
 
