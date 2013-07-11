@@ -28,6 +28,12 @@ let decompress str =
   let populated = Archive.feed_data handle str in
   Archive.extract_all populated
 
+let compress fmt filters entries =
+  let handle = Archive.write_new_configured fmt filters in
+  let opened = Archive.write_open_memory handle in
+  let written = List.fold_left (fun h e -> Archive.write_entry h e) opened entries in
+  Archive.write_close written
+
 (*
  * construct "raw" |> decompress |> compress |> writeout
  *)

@@ -101,12 +101,27 @@ let test_pipe_decompress _ =
     | _ -> assert_failure "Did not decompress to a file")
   | ErrorMonad.Failure (code, str) -> assert_failure "Decompression failed"
 
+let test_pipe_compress_roundtrip _ =
+  let (|>) = Pipe.(|>) in
+  let meta = Archive.generate_metadata "filename" in
+  let contents = "contents" in
+  let entry = Archive.File (contents, meta) in
+  let compress_raw_gz = Pipe.compress Archive.RawFormatWriter [Archive.GZipFilterWriter] in
+  match Pipe.construct [entry] |> compress_raw_gz |> Pipe.decompress with
+  | ErrorMonad.Success (entries) -> (match entries with
+    | [Archive.File (c, m)] -> assert_equal c contents
+    | [r] -> assert_failure "Wrong type"
+    | x::xs -> assert_failure "Too many results"
+    | [] -> assert_failure "No results")
+  | ErrorMonad.Failure (code, str) -> assert_failure "Roundtrip failed"
+
 let suite = "Simple tests" >::: [
   "test_version_getting" >:: test_version_getting;
   "test_decompress_raw_single_file" >:: test_decompress_raw_single_file;
   "test_nocompress_single_file" >:: test_nocompress_single_file;
   "test_compress_uncompress_single_file" >:: test_compress_uncompress_single_file;
   "test_pipe_decompress" >:: test_pipe_decompress;
+  "test_pipe_compress_roundtrip" >:: test_pipe_compress_roundtrip;
 ]
 
 let _ =
