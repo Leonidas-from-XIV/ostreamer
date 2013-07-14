@@ -18,8 +18,8 @@
  * Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
  *)
 
-let construct str =
-  ErrorMonad.Success(str)
+let construct value =
+  ErrorMonad.Success(value)
 
 let decompress str =
   let handle = Archive.read_new_configured

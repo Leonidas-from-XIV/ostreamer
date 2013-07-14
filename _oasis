@@ -1,6 +1,6 @@
 OASISFormat: 0.3
 Name:        ostreamer
-Version:     0.1
+Version:     1.0
 Synopsis:    Library to deal with data streams
 Authors:     Marek Kubica
 License:     LGPL-2.1 with OCaml linking exception
@@ -11,7 +11,7 @@ Library "ost"
   Path:       src/
   Modules:    ErrorMonad, Archive, Pipe
   CSources:   Archive_stubs.c, ost_write_open_memory.c, ost_write_open_memory.h
-  CCLib:      -L/home/marek/libarchive/tmp/libarchive -larchive
+  CCLib:      -larchive
   BuildTools: ocamlbuild
 
 Executable "ost-test"
