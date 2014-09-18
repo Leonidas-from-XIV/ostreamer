@@ -13,9 +13,9 @@ supervision of [Markus Weißmann](http://www.mweissmann.de/).
 Prerequisites
 -------------
 
- * OCaml, of course. Tested with 4.00.1 but should work with older versios as
+ * OCaml, of course. Tested with 4.00.1 but should work with older versions as
    well.
- * libarchive, never than git revision `3ae99fbc24`. Should be part of the
+ * libarchive, newer than git revision `3ae99fbc24`. Should be part of the
    release *after* 3.1.2. On some distributions you might need the `-dev` or
    `-devel` packages from your package manager as well.
  * OASIS 0.3 for building.
